@@ -1,0 +1,150 @@
+$prefix: Ant-Table-Virtualized;
+
+.#{$prefix} {
+  position: relative;
+  border: 1px solid #eee;
+
+  &.Bordered {
+    border-left: none;
+
+    .Cell {
+      border-left: 1px solid #eee;
+    }
+  }
+
+  .Left-Grid-Wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+
+    .Left-Top-Grid-Wrapper {
+      overflow: hidden;
+
+      .Left-Top-Grid {
+        // background-color: lightblue;
+      }
+    }
+
+    .Left-Bottom-Grid-Wrapper {
+      overflow: hidden;
+      background-color: #fff;
+
+      .Left-Bottom-Grid {
+        // background-color: #eee;
+      }
+    }
+  }
+
+  .Middle-Grid-Wrapper {
+    overflow: hidden;
+
+    .Middle-Top-Grid-Wrapper {
+      overflow: hidden;
+
+      .Middle-Top-Grid {
+        // background-color: lightgreen;
+      }
+    }
+
+    .Middle-Bottom-Grid-Wrapper {
+      background-color: #fff;
+    }
+
+  }
+
+  .Right-Grid-Wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+
+    .Right-Top-Grid-Wrapper {
+
+      // background-color: lightcyan;
+      .Right-Top-Grid {
+        // background-color: lightcyan;
+      }
+    }
+
+    .Right-Bottom-Grid-Wrapper {
+      overflow: hidden;
+      background-color: #fff;
+
+      .Right-Bottom-Grid {
+        // background-color: #efefaa;
+      }
+    }
+  }
+
+  .Left-Top-Grid-Wrapper,
+  .Middle-Top-Grid-Wrapper,
+  .Right-Top-Grid-Wrapper {
+    // background-color: lightgreen;
+    background-color: #fafafa;
+  }
+
+  .Left-Bottom-Grid-Wrapper,
+  .Middle-Bottom-Grid-Wrapper,
+  .Right-Bottom-Grid-Wrapper {
+    // background-color: #eee;
+  }
+
+  .Left-Grid-Wrapper {
+    &.With-Shadow {
+      box-shadow: 6px 0 6px -4px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .Right-Grid-Wrapper {
+    &.With-Shadow {
+      box-shadow: -6px 0 6px -4px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .Cell-Head {
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+  }
+
+  .Cell-Body {
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    padding-right: 5px;
+    border-bottom: 1px solid #e8e8e8;
+    transition: background-color .3s;
+    word-break: break-all;
+
+    &.Ellipsis {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &.Highlight:not(.Click-Highlight) {
+      transition: background-color .3s;
+      background-color: #e6f7ff;
+    }
+
+    &.Click-Highlight {
+      transition: background-color .3s;
+      background-color: lightgreen;
+    }
+
+    &.Cell-Even:not(.Highlight):not(.Click-Highlight) {
+      background-color: #fefef1;
+    }
+
+    .Ellipsis {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  
+}
