@@ -6,7 +6,7 @@
 
 ## Usage
 
-Please refer to App.js for usage, feel free to contact me <lingirlsea@gmail.com> :smile:
+Please refer to App.js for usage, feel free to contact me <lingirlsea@gmail.com> :love:
 
 
 ## Related libraries
