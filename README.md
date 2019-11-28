@@ -16,9 +16,6 @@ Please refer to App.js for usage, feel free to contact me <lingirlsea@gmail.com>
 * [`react-virtualized-auto-sizer`](https://npmjs.com/package/react-virtualized-auto-sizer): HOC that grows to fit all of the available space and passes the width and height values to its child.
 
 
-## 
-
-lingirlsea@gmail.com
 ## License
 
 MIT
