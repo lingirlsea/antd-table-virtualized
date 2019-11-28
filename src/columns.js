@@ -5,22 +5,34 @@ import React from 'react'
 const columns = [
   {
     fixed: 'left',
-    width: 100,
+    width: 70,
     title: '序号',
     dataIndex: 'index',
+    sort: {
+      defaultOrder: 'ascend',
+      handle: (sortConf) => {
+        console.log(sortConf)
+      }
+    }
   },
   {
     fixed: 'left',
     width: 100,
     title: '姓名',
     dataIndex: 'name',
+    sort: {
+      defaultOrder: 'descend',
+      handle: (sortConf) => {
+        console.log(sortConf)
+      }
+    },
     // ellipsis: true,
     // toolTip: {
     //   placement: 'right'
     // },
     render: (text, record, index) => {
       return (
-        <div style={{ backgroundColor: index === 2 ? 'lightblue' : '' }}>
+        <div style={{ backgroundColor: index === 2 ? 'lightgreen' : '' }}>
           {text}
         </div>
       )
@@ -29,14 +41,13 @@ const columns = [
   {
     fixed: 'left',
     width: 60,
-    title: '身高',
+    title: '身高',  
     dataIndex: 'height',
     ellipsis: true,
     toolTip: true,
   },
-
   {
-    fixed: 'right', 
+    fixed: 'right',
     width: 100,
     title: '操作',
     dataIndex: 'handle',
@@ -50,7 +61,7 @@ const columns = [
 ]
 
 
-Array.from({ length: 20 }).forEach((_, index) => {
+Array.from({ length: 10 }).forEach((_, index) => {
   columns.push({
     title: `标题${index + 1}`,
     width: 100,

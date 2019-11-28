@@ -3,12 +3,11 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { VariableSizeGrid as Grid } from 'react-window'
 import scrollbarSize from 'dom-helpers/scrollbarSize'
 import classNames from 'classnames'
-import { Tooltip, Checkbox } from 'antd'
+import { Icon, Tooltip, Checkbox, Pagination } from 'antd'
 
-import columns from './columns'
 import './AntdTableVirtualized.scss'
 
-const classPrefix = 'Ant-Table-Virtualized'
+const classPrefix = 'Antd-Table-Virtualized'
 
 export default class AntTableVirtualized extends React.Component {
 
@@ -16,7 +15,8 @@ export default class AntTableVirtualized extends React.Component {
     rowHeight: 40,
     rowHeadHeight: 40,
     clickHighlight: false,
-    onRow: () => ({})
+    onRow: () => ({}),
+    pagination: false,
   }
 
   constructor(props) {
@@ -25,6 +25,7 @@ export default class AntTableVirtualized extends React.Component {
     this.state = {
       showLeftShadow: false,
       showRightShadow: true,
+      columnsSortConf: {},
     }
 
     this.containerRef = React.createRef()
@@ -39,6 +40,9 @@ export default class AntTableVirtualized extends React.Component {
     this.rightTopGridRef = React.createRef()
     this.rightBottomGridRef = React.createRef()
 
+    this.prevPage = 1
+    this.page = 1
+
     this.columnsConf = this.columnsConf()
     this.clickedRowIndex = -1
 
@@ -47,8 +51,40 @@ export default class AntTableVirtualized extends React.Component {
     this.scrollbarSize = scrollbarSize()
   }
 
+  componentDidUpdate() {
+    const { dataSource, rowSelection } = this.props
+
+    if(this.prevPage !== this.page) {
+      this.prevPage = this.page
+      this.rightBottomGridRef.current.scrollTo({ scrollTop: 0 })
+    }
+
+    // Handle data checked and disabled
+    if(rowSelection) {
+      const { selectedRowKeys, getCheckboxProps, onChange } = rowSelection
+
+      let _selectedRowKeys = [...selectedRowKeys]
+      let _selectedRows = []
+
+      dataSource.forEach((item, index) => {
+        let checkboxProps = getCheckboxProps(item)
+        if(checkboxProps.disabled && checkboxProps.checked && !selectedRowKeys.some(i => i === index)) {
+          _selectedRowKeys.push(index)
+        }
+      })
+
+      // Just ensure data ascending sort by index
+      if(_selectedRowKeys.length !== selectedRowKeys.length) {
+        _selectedRowKeys.sort((a, b) => a - b)
+        _selectedRowKeys.forEach(key => _selectedRows.push(dataSource[key]))
+        onChange(_selectedRowKeys, _selectedRows)
+      }
+
+    }
+  }
+
   columnsConf = () => {
-    const { rowSelection } = this.props
+    const { rowSelection, columns } = this.props
     const _columns = [...columns]
 
     let ret = {
@@ -77,10 +113,12 @@ export default class AntTableVirtualized extends React.Component {
             throw Error(`selectedRowKeys should be Array in rowSelection prop`)
           }
 
+          const checkboxProps = rowSelection.getCheckboxProps(record)
           let checked = selectedRowKeys.some(i => i === index)
 
           return (
             <Checkbox
+              {...checkboxProps}
               checked={checked}
               onClick={ e => this.onCheckboxClick(index, e) }
             />
@@ -100,6 +138,10 @@ export default class AntTableVirtualized extends React.Component {
     _columns.forEach(item => {
       if (!item.hasOwnProperty('width')) {
         item.width = 0
+      }
+
+      if(item.sort) {
+        this.state.columnsSortConf[item.dataIndex] = item.sort.defaultOrder
       }
 
       ret.totalWidth += item.width
@@ -182,24 +224,52 @@ export default class AntTableVirtualized extends React.Component {
   }
 
   renderTopCell = ({ place, columnIndex, style }) => {
-    const classes = classNames('Cell Cell-Head')
     const columnItem = this.columnsConf[`${place}Columns`][columnIndex]
+    const classes = classNames(
+      'Cell Cell-Head',
+      {
+        'Sort': !!columnItem['sort']
+      }
+    )
+
     let content = columnItem['title']
+
+    if(columnItem.sort) {
+      const caretUpClassName = classNames({
+        'Activated': this.state.columnsSortConf[columnItem.dataIndex] === 'ascend'
+      })
+      const caretDownClassName = classNames({
+        'Activated': this.state.columnsSortConf[columnItem.dataIndex] === 'descend'
+      })
+
+      content = (
+        <div className="Sortable-Wrapper">
+          <div className="Content">
+            {content}
+          </div>
+          <div className="Icons">
+            <Icon className={caretUpClassName} style={{ marginBottom: -4 }} type="caret-up" />
+            <Icon className={caretDownClassName} type="caret-down" />
+          </div>
+        </div>
+      )
+    }
 
     if(place === 'middle' && columnItem.fixed === 'left') {
       content = ''
     }
 
-    // when rowSecection prop avaiable
+    // when rowSecection prop available
     if(columnItem.internalUseOnly) {
 
       const { dataSource, rowSelection: { selectedRowKeys } } = this.props
-      const checked = selectedRowKeys.length === dataSource.length
+      const checked = !!dataSource.length && selectedRowKeys.length === dataSource.length
       const indeterminate = checked ? false : selectedRowKeys.length ? true : false
 
       content = (
         <Checkbox
-          checked={checked}
+          disabled={!dataSource.length}
+          defaultChecked={checked}
           indeterminate={indeterminate}
           onClick={ e => this.onCheckboxClick(-1, e) }
         />
@@ -207,17 +277,26 @@ export default class AntTableVirtualized extends React.Component {
     }
 
     return (
-      <div className={classes} style={style}>
+      <div
+        className={classes}
+        style={style}
+        onClick={() => { this.onHeadCellClick(columnItem) }}
+      >
         {content}
       </div>
     )
   }
 
   renderBottomCell = ({ place, columnIndex, rowIndex, style }) => {
-    const { dataSource, striped } = this.props
+    const { dataSource, striped, rowSelection } = this.props
     const columnItem = this.columnsConf[`${place}Columns`][columnIndex]
     const key = columnItem['dataIndex']
     let content = dataSource[rowIndex][key]
+    let hasSelectedClassName = false
+
+    if(rowSelection) {
+      hasSelectedClassName = rowSelection.selectedRowKeys.some(i => i === rowIndex)
+    }
 
     const styles = {
       ...style,
@@ -229,7 +308,8 @@ export default class AntTableVirtualized extends React.Component {
       striped ? rowIndex % 2 ? 'Cell-Even' : 'Cell-Odd' : '',
       {
         'Click-Highlight': this.clickedRowIndex === rowIndex,
-        Ellipsis: columnItem.ellipsis && !columnItem.toolTip
+        'Ellipsis': columnItem.ellipsis && !columnItem.toolTip,
+        'Selected': hasSelectedClassName,
       }
     )
     
@@ -299,21 +379,28 @@ export default class AntTableVirtualized extends React.Component {
   }
 
   render() {
-    const { rowHeadHeight, dataSource, bordered } = this.props
+    const { rowHeadHeight, dataSource, bordered, placeholder, pagination } = this.props
     const rowCount = dataSource.length
+    const showLeftShadow = rowCount && this.state.showLeftShadow
+    const showRightShadow = rowCount && this.columnsConf.right && this.state.showRightShadow
+    const paginationHeight = pagination ? pagination.height || 50 : 0
 
     return (
       <div style={{ flex: 1 }}>
         <AutoSizer>
         {({height, width}) => {
 
-          const diff = width - this.columnsConf.totalWidth - this.scrollbarSize
+          const diff = width - this.columnsConf.totalWidth - this.scrollbarSize - 2
 
-          if (diff >= 0) {            
+          if (diff >= 0) {
             this.horizontalScrollbarSize = 0
           }
 
-          const bodyHeight = height - rowHeadHeight - this.scrollbarSize - this.horizontalScrollbarSize
+          // Minus the border top 1px
+          let bodyHeight = height - rowHeadHeight - this.horizontalScrollbarSize - 1
+
+          height = height - paginationHeight
+          bodyHeight = bodyHeight - paginationHeight
 
           for (let i = 0; i < this.columnsConf.middleColumns.length; i++) {
             let item = this.columnsConf.middleColumns[i]
@@ -333,143 +420,181 @@ export default class AntTableVirtualized extends React.Component {
             <div
               ref={this.containerRef}
               className={classNames(classPrefix, { Bordered: bordered })}
-              style={{ width, height: height - this.scrollbarSize }}
+              style={{ width, height }}
             >
-              <div
-                className={classNames(
-                  'Left-Grid-Wrapper',
-                  { 'With-Shadow': this.state.showLeftShadow }
-                )}
-                style={{ height: height - this.scrollbarSize }}
-              >
+              {/* placeholder when no data */}
+              {
+                !dataSource.length &&
                 <div
-                  className="Left-Top-Grid-Wrapper"
-                  style={{ height: rowHeadHeight }}>
-                  <Grid
-                    className={classNames('Left-Top-Grid')}
-                    columnCount={this.columnsConf.left}
-                    columnWidth={index => this.columnsConf.leftColumns[index].width}
-                    height={rowHeadHeight + this.scrollbarSize}
-                    rowCount={1}
-                    rowHeight={this.rowHeadHeight}
-                    width={this.columnsConf.leftWidth}
-                    ref={this.leftTopGridRef}
-                  >
-                    {this.renderLeftTopCell}
-                  </Grid>
+                  className="Placeholder"
+                  style={{
+                    height: height - rowHeadHeight - 2,
+                    top: rowHeadHeight
+                  }}
+                >
+                  {placeholder}
                 </div>
-                <div className="Left-Bottom-Grid-Wrapper" style={{ width: this.columnsConf.leftWidth }}>
-                  <Grid
-                    className={classNames('Left-Bottom-Grid')}
-                    columnCount={this.columnsConf.left}
-                    columnWidth={index => this.columnsConf.leftColumns[index].width}
-                    height={bodyHeight}
-                    rowCount={rowCount}
-                    rowHeight={this.rowHeight}
-                    width={this.columnsConf.leftWidth + this.scrollbarSize}
-                    ref={this.leftBottomGridRef}
-                    onScroll={this.onScrollLeftBottom}  
-                  >
-                    {this.renderLeftBottomCell}
-                  </Grid>
+              }
+              <div className="Grids-Wrapper" style={{ height }}>
+                <div
+                  className={classNames(
+                    'Left-Grid-Wrapper',
+                    { 'With-Shadow': showLeftShadow }
+                  )}
+                >
+                  <div
+                    className={classNames(
+                      'Left-Top-Grid-Wrapper',
+                      { 'With-Shadow': !dataSource.length }
+                    )}
+                    style={{ height: rowHeadHeight }}>
+                    <Grid
+                      className={classNames('Left-Top-Grid')}
+                      columnCount={this.columnsConf.left}
+                      columnWidth={index => this.columnsConf.leftColumns[index].width}
+                      height={rowHeadHeight + this.scrollbarSize}
+                      rowCount={1}
+                      rowHeight={this.rowHeadHeight}
+                      width={this.columnsConf.leftWidth}
+                      ref={this.leftTopGridRef}
+                    >
+                      {this.renderLeftTopCell}
+                    </Grid>
+                  </div>
+                  <div className="Left-Bottom-Grid-Wrapper" style={{ width: this.columnsConf.leftWidth }}>
+                    <Grid
+                      className={classNames('Left-Bottom-Grid')}
+                      columnCount={this.columnsConf.left}
+                      columnWidth={index => this.columnsConf.leftColumns[index].width}
+                      height={bodyHeight}
+                      rowCount={rowCount}
+                      rowHeight={this.rowHeight}
+                      width={this.columnsConf.leftWidth + this.scrollbarSize}
+                      ref={this.leftBottomGridRef}
+                      onScroll={this.onScrollLeftBottom}  
+                    >
+                      {this.renderLeftBottomCell}
+                    </Grid>
+                  </div>
                 </div>
-              </div>
 
-              <div
-                className="Middle-Grid-Wrapper"
-                style={{ height: height - this.scrollbarSize }}
-              >
                 <div
-                  className="Middle-Top-Grid-Wrapper"
-                  style={{
-                    width,
-                    height: rowHeadHeight,
-                  }}
+                  className="Middle-Grid-Wrapper"
+                  style={{ height }}
                 >
-                  <Grid
-                    className={classNames('Middle-Top-Grid')}
-                    style={{ paddingLeft: this.columnsConf.rightWidth }}
-                    columnCount={this.columnsConf.middleColumns.length}
-                    columnWidth={index => this.columnsConf.middleColumns[index].width}
-                    height={rowHeadHeight + this.scrollbarSize}
-                    rowCount={1}
-                    rowHeight={this.rowHeadHeight}
-                    width={width - this.scrollbarSize}
-                    ref={this.middleTopGridRef}
-                    onScroll={this.onScrollMiddleTop}
+                  <div
+                    className="Middle-Top-Grid-Wrapper"
+                    style={{
+                      width,
+                      height: rowHeadHeight,
+                    }}
                   >
-                    {this.renderMiddleTopCell}
-                  </Grid>
-                </div>
-                <div
-                  className="Middle-Bottom-Grid-Wrapper"
-                >
-                  <Grid
-                    className={classNames('Middle-Bottom-Grid')}
-                    style={{ paddingLeft: this.columnsConf.rightWidth }}
-                    columnCount={this.columnsConf.middleColumns.length}
-                    columnWidth={index => this.columnsConf.middleColumns[index].width}
-                    width={width}
-                    height={bodyHeight + this.horizontalScrollbarSize}
-                    rowCount={rowCount}
-                    rowHeight={this.rowHeight}
-                    innerRef={this.middleBottomGridInnerRef}
-                    ref={this.middleBottomGridRef}
-                    onScroll={this.onScrollMiddleBottom}
+                    <Grid
+                      className={classNames('Middle-Top-Grid')}
+                      style={{ paddingLeft: this.columnsConf.rightWidth }}
+                      columnCount={this.columnsConf.middleColumns.length}
+                      columnWidth={index => this.columnsConf.middleColumns[index].width}
+                      height={rowHeadHeight + this.scrollbarSize}
+                      rowCount={1}
+                      rowHeight={this.rowHeadHeight}
+                      width={width - this.scrollbarSize - 2}
+                      ref={this.middleTopGridRef}
+                      onScroll={this.onScrollMiddleTop}
+                    >
+                      {this.renderMiddleTopCell}
+                    </Grid>
+                  </div>
+                  <div
+                    className="Middle-Bottom-Grid-Wrapper"
                   >
-                    {this.renderMiddleBottomCell}
-                  </Grid>
+                    <Grid
+                      className={classNames('Middle-Bottom-Grid')}
+                      style={{ paddingLeft: this.columnsConf.rightWidth, overflow: 'scroll' }}
+                      columnCount={this.columnsConf.middleColumns.length}
+                      columnWidth={index => this.columnsConf.middleColumns[index].width}
+                      width={width - 2}
+                      height={bodyHeight + (this.horizontalScrollbarSize || this.scrollbarSize) }
+                      rowCount={rowCount}
+                      rowHeight={this.rowHeight}
+                      innerRef={this.middleBottomGridInnerRef}
+                      ref={this.middleBottomGridRef}
+                      onScroll={this.onScrollMiddleBottom}
+                    >
+                      {this.renderMiddleBottomCell}
+                    </Grid>
+                  </div>
                 </div>
-              </div>
 
-              <div
-                style={{ height: height - this.scrollbarSize }}
-                className={classNames(
-                  'Right-Grid-Wrapper',
-                  { 'With-Shadow': this.columnsConf.right && this.state.showRightShadow }
-                )}>
-                <div
-                  className="Right-Top-Grid-Wrapper"
-                  style={{
-                    width: this.columnsConf.rightWidth + this.scrollbarSize,
-                    height: rowHeadHeight
-                  }}
-                >
-                  <Grid
-                    className={classNames('Right-Top-Grid')}
-                    columnCount={this.columnsConf.right}
-                    columnWidth={index => this.columnsConf.rightColumns[index].width}
-                    height={rowHeadHeight + this.scrollbarSize}
-                    rowCount={1}
-                    rowHeight={this.rowHeadHeight}
-                    width={this.columnsConf.rightWidth}
-                    ref={this.rightTopGridRef}
-                    onScroll={this.onScrollRightTop}
-                  >
-                    {this.renderRightTopCell}
-                  </Grid>
-                </div>
-                <div
-                  className="Right-Bottom-Grid-Wrapper"
-                  style={{
-                    width: this.columnsConf.rightWidth + this.scrollbarSize
-                  }}
-                >
-                  <Grid
-                    className={classNames('Right-Bottom-Grid')}
-                    columnCount={this.columnsConf.right}
-                    columnWidth={index => this.columnsConf.rightColumns[index].width}
-                    height={bodyHeight}
-                    rowCount={rowCount}
-                    rowHeight={this.rowHeight}
-                    width={this.columnsConf.rightWidth + this.scrollbarSize}
-                    ref={this.rightBottomGridRef}
-                    onScroll={this.onScrollRightBottom}
-                  >
-                    {this.renderRightBottomCell}
-                  </Grid>
-                </div>
+                {
+                  this.columnsConf.right &&
+                  <div
+                    className={classNames(
+                      'Right-Grid-Wrapper',
+                      { 'With-Shadow': showRightShadow }
+                    )}>
+                    <div
+                      className={classNames(
+                        'Right-Top-Grid-Wrapper',
+                        { 'With-Shadow': !dataSource.length }
+                      )}
+                      style={{
+                        width: this.columnsConf.rightWidth + this.scrollbarSize,
+                        height: rowHeadHeight
+                      }}
+                    >
+                      <Grid
+                        className={classNames('Right-Top-Grid')}
+                        columnCount={this.columnsConf.right}
+                        columnWidth={index => this.columnsConf.rightColumns[index].width}
+                        height={rowHeadHeight + this.scrollbarSize}
+                        rowCount={1}
+                        rowHeight={this.rowHeadHeight}
+                        width={this.columnsConf.rightWidth}
+                        ref={this.rightTopGridRef}
+                        onScroll={this.onScrollRightTop}
+                      >
+                        {this.renderRightTopCell}
+                      </Grid>
+                    </div>
+                    <div
+                      className="Right-Bottom-Grid-Wrapper"
+                      style={{
+                        width: this.columnsConf.rightWidth + this.scrollbarSize,
+                      }}
+                    >
+                      <Grid
+                        className={classNames('Right-Bottom-Grid')}
+                        columnCount={this.columnsConf.right}
+                        columnWidth={index => this.columnsConf.rightColumns[index].width}
+                        height={bodyHeight}
+                        rowCount={rowCount}
+                        rowHeight={this.rowHeight}
+                        width={this.columnsConf.rightWidth + this.scrollbarSize}
+                        ref={this.rightBottomGridRef}
+                        onScroll={this.onScrollRightBottom}
+                      >
+                        {this.renderRightBottomCell}
+                      </Grid>
+                    </div>
+                  </div>
+                }
+
               </div>
+              {
+                pagination &&
+                <div
+                  className="Pagination-Wrapper"
+                  style={{
+                    height: paginationHeight,
+                    ...pagination.wrapperStyle
+                  }}
+                >
+                  <Pagination
+                    {...pagination}
+                    onChange={this.onPaginationChange}
+                  />
+                </div>
+              }
             </div>
           )
         }}
@@ -501,7 +626,7 @@ export default class AntTableVirtualized extends React.Component {
       }
     }
 
-    // // Fixed-Left Shadow
+    // Fixed-Left Shadow
     if(this.columnsConf.left) {
       if (horizontalScrollDirection === 'backward' && scrollLeft < 5) {
         if (this.state.showLeftShadow) {
@@ -515,6 +640,45 @@ export default class AntTableVirtualized extends React.Component {
       }
     }
 
+  }
+
+  onHeadCellClick = column => {
+    const { multipleSort } = this.props
+
+    if(column.sort) {
+      let columnsSortConf = {...this.state.columnsSortConf}
+      let dataIndex = column['dataIndex']
+      let val = columnsSortConf[dataIndex]
+
+      if(multipleSort) {
+        if(val === 'ascend') {
+          val = 'descend'
+        } else if (val === 'descend') {
+          val = ''
+        } else {
+          val = 'ascend'
+        }
+  
+      } else {
+        for(let key in columnsSortConf) {
+          if(key === dataIndex) {
+            if(val === 'ascend') {
+              val = 'descend'
+            } else if (val === 'descend') {
+              val = ''
+            } else {
+              val = 'ascend'
+            }
+  
+          } else {
+            columnsSortConf[key] = ''
+          }
+        }
+      }
+
+      columnsSortConf[dataIndex] = val
+      this.setState({ columnsSortConf }, () => { column.sort.handle(columnsSortConf) })
+    }
   }
 
   onRowMouseEnter = (rowIndex, event) => {
@@ -554,12 +718,17 @@ export default class AntTableVirtualized extends React.Component {
     }
   }
 
+  onPaginationChange = (page, pageSize) => {
+    this.page = page
+    this.props.pagination.onChange(page, pageSize)
+  }
+
   onCheckboxClick = (rowIndex, event) => {
     event.stopPropagation()
 
     const checked = event.target.checked
     const { dataSource } = this.props
-    const { selectedRowKeys, onChange, onSelect, onSelectAll } = this.props.rowSelection
+    const { selectedRowKeys, onChange, onSelect, onSelectAll, getCheckboxProps } = this.props.rowSelection
 
     let copySelectedRowKeys = [...selectedRowKeys]
     let selectedRows = []
@@ -570,18 +739,20 @@ export default class AntTableVirtualized extends React.Component {
       let _selectedRowKeys = []
 
       dataSource.forEach((item, index) => {
-        if(copySelectedRowKeys.some(i => i === index)) {
+        if(!copySelectedRowKeys.some(i => i === index)) {
           changeRows.push(item)
         }
-        _selectedRows.push(item)
-        _selectedRowKeys.push(index)
+
+        if(!getCheckboxProps(item).disabled) {
+          _selectedRows.push(item)
+          _selectedRowKeys.push(index)
+        }
       })
 
       selectedRows = checked ? _selectedRows : []
       copySelectedRowKeys = checked ? _selectedRowKeys : []
 
       onSelectAll && onSelectAll(checked, selectedRows, changeRows)
-      // console.log(this.leftBottomGridRef.current.resetAfterRowIndex(0))
     } else {
 
       if(checked) {

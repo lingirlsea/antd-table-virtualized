@@ -1,15 +1,28 @@
-$prefix: Ant-Table-Virtualized;
+$color-border: #e8e8e8;
+$color-shadow: rgba(0, 0, 0, 0.15);
+
+$prefix: Antd-Table-Virtualized;
 
 .#{$prefix} {
   position: relative;
-  border: 1px solid #eee;
+  border: 1px solid $color-border;
 
   &.Bordered {
-    border-left: none;
-
-    .Cell {
-      border-left: 1px solid #eee;
+    .Cell-Head {
+      border-right: 1px solid transparent;
+      // border-right: 1px solid $color-border;
     }
+    .Cell-Body {
+      border-right: 1px solid $color-border;
+    }
+  }
+
+  .Placeholder {
+    z-index: 9;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
   }
 
   .Left-Grid-Wrapper {
@@ -20,19 +33,11 @@ $prefix: Ant-Table-Virtualized;
 
     .Left-Top-Grid-Wrapper {
       overflow: hidden;
-
-      .Left-Top-Grid {
-        // background-color: lightblue;
-      }
     }
 
     .Left-Bottom-Grid-Wrapper {
       overflow: hidden;
       background-color: #fff;
-
-      .Left-Bottom-Grid {
-        // background-color: #eee;
-      }
     }
   }
 
@@ -41,10 +46,6 @@ $prefix: Ant-Table-Virtualized;
 
     .Middle-Top-Grid-Wrapper {
       overflow: hidden;
-
-      .Middle-Top-Grid {
-        // background-color: lightgreen;
-      }
     }
 
     .Middle-Bottom-Grid-Wrapper {
@@ -59,46 +60,39 @@ $prefix: Ant-Table-Virtualized;
     right: 0;
     z-index: 1;
 
-    .Right-Top-Grid-Wrapper {
-
-      // background-color: lightcyan;
-      .Right-Top-Grid {
-        // background-color: lightcyan;
-      }
-    }
-
     .Right-Bottom-Grid-Wrapper {
       overflow: hidden;
       background-color: #fff;
-
-      .Right-Bottom-Grid {
-        // background-color: #efefaa;
-      }
     }
   }
 
   .Left-Top-Grid-Wrapper,
   .Middle-Top-Grid-Wrapper,
   .Right-Top-Grid-Wrapper {
-    // background-color: lightgreen;
-    background-color: #fafafa;
+    background-color: #d2e1f7;
   }
 
-  .Left-Bottom-Grid-Wrapper,
-  .Middle-Bottom-Grid-Wrapper,
-  .Right-Bottom-Grid-Wrapper {
-    // background-color: #eee;
+  .Left-Top-Grid-Wrapper {
+    &.With-Shadow {
+      box-shadow: 6px 0 6px -4px $color-shadow;
+    }
+  }
+
+  .Right-Top-Grid-Wrapper {
+    &.With-Shadow {
+      box-shadow: -6px 0 6px -4px $color-shadow;
+    }
   }
 
   .Left-Grid-Wrapper {
     &.With-Shadow {
-      box-shadow: 6px 0 6px -4px rgba(0, 0, 0, 0.15);
+      box-shadow: 6px 0 6px -4px $color-shadow;
     }
   }
 
   .Right-Grid-Wrapper {
     &.With-Shadow {
-      box-shadow: -6px 0 6px -4px rgba(0, 0, 0, 0.15);
+      box-shadow: -6px 0 6px -4px $color-shadow;
     }
   }
 
@@ -106,6 +100,38 @@ $prefix: Ant-Table-Virtualized;
     display: flex;
     align-items: center;
     padding-left: 15px;
+
+    &.Sort {
+      transition: background-color .3s;
+
+      &:hover {
+        transition: background-color .3s;
+        background-color: #b9d1f5;
+        cursor: pointer;
+      }
+    }
+
+    .Sortable-Wrapper {
+      display: flex;
+      align-items: center;
+
+      .Content {
+        padding-right: 4px;
+      }
+
+      .Icons {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 10px;
+        color: rgb(191, 191, 191);
+
+        .Activated {
+          color: #1890ff;
+        }
+      }
+    }
   }
 
   .Cell-Body {
@@ -124,6 +150,10 @@ $prefix: Ant-Table-Virtualized;
       white-space: nowrap;
     }
 
+    &.Selected {
+      background-color: lightblue;
+    }
+
     &.Highlight:not(.Click-Highlight) {
       transition: background-color .3s;
       background-color: #e6f7ff;
@@ -131,11 +161,11 @@ $prefix: Ant-Table-Virtualized;
 
     &.Click-Highlight {
       transition: background-color .3s;
-      background-color: lightgreen;
+      background-color: #c3ddf9;
     }
 
-    &.Cell-Even:not(.Highlight):not(.Click-Highlight) {
-      background-color: #fefef1;
+    &.Cell-Even:not(.Highlight):not(.Click-Highlight):not(.Selected) {
+      background-color: #f2f8fd;
     }
 
     .Ellipsis {
@@ -146,5 +176,10 @@ $prefix: Ant-Table-Virtualized;
     }
   }
 
-  
+  .Pagination-Wrapper {
+    width: calc(100% + 2px);
+    display: flex;
+    align-items: center;
+    background-color: lightcyan;
+  }
 }
