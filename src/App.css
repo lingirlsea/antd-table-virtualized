@@ -1,20 +1,11 @@
 @import '~antd/dist/antd.css';
 
-
 * {
   box-sizing: border-box;
 }
 
-html, body {
-  /* height: 100%; */
-}
-
 body {
   padding-top: 20px
-}
-
-#root {
-  /* height: 100%; */
 }
 
 .App {
