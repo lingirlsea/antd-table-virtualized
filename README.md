@@ -1,7 +1,7 @@
 ## antd-table-virtualized
 > React table components compatible with some antd table API
 
-❗️ `Note that this version is not yet stable, please do not use it in production environment`
+:warning: `Note that this version is not yet stable, please do not use it in production environment`
 
 
 ## Usage
