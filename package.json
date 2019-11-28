@@ -1,7 +1,14 @@
 {
-  "name": "table",
+  "name": "antd-table-virtualized",
+  "description": "React table components compatible with some antd table API",
+  "author": "lingirlsea <lingirlsea@gmail.com>",
   "version": "0.1.0",
-  "private": true,
+  "keywords": [
+    "virtualized",
+    "antd table",
+    "antd table virtualized",
+    "react virtualized table"
+  ],
   "dependencies": {
     "antd": "^3.25.2",
     "axios": "^0.19.0",
@@ -12,9 +19,10 @@
     "react-dom": "^16.11.0",
     "react-scripts": "3.2.0",
     "react-virtualized-auto-sizer": "^1.0.2",
-    "react-window": "^1.8.5",
-    "shortid": "^2.2.15"
+    "react-window": "^1.8.5"
   },
+  "repository": "https://github.com/lingirlsea/antd-table-virtualized",
+  "license": "MIT",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
