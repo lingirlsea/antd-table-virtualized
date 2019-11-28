@@ -1,7 +1,7 @@
 import React from 'react'
 import Axios from "axios"
 import AntdTableVirtulized from './AntdTableVirtualized'
-import { Table } from 'antd'
+// import { Table } from 'antd'
 import columns from './columns'
 import './App.css'
 
