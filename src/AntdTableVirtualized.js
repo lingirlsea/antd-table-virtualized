@@ -25,7 +25,7 @@ export default class AntTableVirtualized extends React.Component {
     this.state = {
       showLeftShadow: false,
       showRightShadow: true,
-      columnsSortConf: {},
+      columnsSortConf: this.columnsSortConf(),
     }
 
     this.containerRef = React.createRef()
@@ -83,6 +83,17 @@ export default class AntTableVirtualized extends React.Component {
     }
   }
 
+  columnsSortConf = () => {
+    let ret = {}
+    this.props.columns.forEach(item => {
+      if(item.sort) {
+        ret[item.dataIndex] = item.sort.defaultOrder
+      }
+    })
+    
+    return ret
+  }
+
   columnsConf = () => {
     const { rowSelection, columns } = this.props
     const _columns = [...columns]
@@ -138,10 +149,6 @@ export default class AntTableVirtualized extends React.Component {
     _columns.forEach(item => {
       if (!item.hasOwnProperty('width')) {
         item.width = 0
-      }
-
-      if(item.sort) {
-        this.state.columnsSortConf[item.dataIndex] = item.sort.defaultOrder
       }
 
       ret.totalWidth += item.width

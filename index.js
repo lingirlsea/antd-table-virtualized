@@ -1,1 +1,1 @@
-module.exports = require('./src/AntdTableVirtualized')
+module.exports = require('./dist/AntdTableVirtualized')
