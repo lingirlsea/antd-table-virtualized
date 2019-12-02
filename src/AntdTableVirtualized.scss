@@ -1,5 +1,10 @@
 $color-border: #e8e8e8;
 $color-shadow: rgba(0, 0, 0, 0.15);
+$color-background-10: #fafafa;
+$color-background-11: #e5e5e5;
+$color-background-12: #d6f2ff;
+$color-background-13: #f2f8fd;
+
 
 $prefix: Antd-Table-Virtualized;
 
@@ -10,7 +15,6 @@ $prefix: Antd-Table-Virtualized;
   &.Bordered {
     .Cell-Head {
       border-right: 1px solid transparent;
-      // border-right: 1px solid $color-border;
     }
     .Cell-Body {
       border-right: 1px solid $color-border;
@@ -69,7 +73,8 @@ $prefix: Antd-Table-Virtualized;
   .Left-Top-Grid-Wrapper,
   .Middle-Top-Grid-Wrapper,
   .Right-Top-Grid-Wrapper {
-    background-color: #d2e1f7;
+    background-color: $color-background-10;
+    
   }
 
   .Left-Top-Grid-Wrapper {
@@ -106,7 +111,7 @@ $prefix: Antd-Table-Virtualized;
 
       &:hover {
         transition: background-color .3s;
-        background-color: #b9d1f5;
+        background-color: $color-background-11;
         cursor: pointer;
       }
     }
@@ -139,7 +144,7 @@ $prefix: Antd-Table-Virtualized;
     align-items: center;
     padding-left: 15px;
     padding-right: 5px;
-    border-bottom: 1px solid #e8e8e8;
+    border-bottom: 1px solid $color-border;
     transition: background-color .3s;
     word-break: break-all;
 
@@ -151,21 +156,21 @@ $prefix: Antd-Table-Virtualized;
     }
 
     &.Selected {
-      background-color: lightblue;
+      background-color: #d3dce6;
     }
 
     &.Highlight:not(.Click-Highlight) {
       transition: background-color .3s;
-      background-color: #e6f7ff;
+      background-color: $color-background-12;
     }
 
     &.Click-Highlight {
       transition: background-color .3s;
-      background-color: #c3ddf9;
+      background-color: #c2e2ff;
     }
 
     &.Cell-Even:not(.Highlight):not(.Click-Highlight):not(.Selected) {
-      background-color: #f2f8fd;
+      background-color: $color-background-13;
     }
 
     .Ellipsis {
@@ -180,6 +185,5 @@ $prefix: Antd-Table-Virtualized;
     width: calc(100% + 2px);
     display: flex;
     align-items: center;
-    background-color: lightcyan;
   }
 }

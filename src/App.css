@@ -11,6 +11,6 @@ body {
 .App {
   display: flex;
   flex-direction: column;
-  height: 300px;
+  height: 600px;
   padding: 0 100px;
 }
