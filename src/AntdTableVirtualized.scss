@@ -178,6 +178,13 @@ $prefix: Antd-Table-Virtualized;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+
+      > * {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
 

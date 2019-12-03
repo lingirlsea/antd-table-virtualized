@@ -26,13 +26,13 @@ const columns = [
         console.log(sortConf)
       }
     },
-    // ellipsis: true,
-    // toolTip: {
-    //   placement: 'right'
-    // },
+    ellipsis: true,
+    toolTip: {
+      placement: 'right'
+    },
     render: (text, record, index) => {
       return (
-        <div style={{ backgroundColor: index === 2 ? 'lightgreen' : '' }}>
+        <div className="" style={{ backgroundColor: index === 2 ? 'lightgreen' : '' }}>
           {text}
         </div>
       )

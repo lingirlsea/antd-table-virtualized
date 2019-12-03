@@ -25,8 +25,11 @@ export default class AntTableVirtualized extends React.Component {
     this.state = {
       showLeftShadow: false,
       showRightShadow: true,
+      clickedRowIndex: -1,
       columnsSortConf: this.columnsSortConf(),
     }
+
+    this.instanceKey = `${classPrefix}-${String(Math.random()).replace('.', '')}`
 
     this.containerRef = React.createRef()
 
@@ -44,7 +47,6 @@ export default class AntTableVirtualized extends React.Component {
     this.page = 1
 
     this.columnsConf = this.columnsConf()
-    this.clickedRowIndex = -1
 
     // horizontal scrollbar size
     this.horizontalScrollbarSize = scrollbarSize()
@@ -298,7 +300,7 @@ export default class AntTableVirtualized extends React.Component {
     const { dataSource, striped, rowSelection } = this.props
     const columnItem = this.columnsConf[`${place}Columns`][columnIndex]
     const key = columnItem['dataIndex']
-    let content = dataSource[rowIndex][key]
+    let text = dataSource[rowIndex][key]
     let hasSelectedClassName = false
 
     if(rowSelection) {
@@ -314,11 +316,13 @@ export default class AntTableVirtualized extends React.Component {
       'Cell Cell-Body',
       striped ? rowIndex % 2 ? 'Cell-Even' : 'Cell-Odd' : '',
       {
-        'Click-Highlight': this.clickedRowIndex === rowIndex,
+        'Click-Highlight': this.state.clickedRowIndex === rowIndex,
         'Ellipsis': columnItem.ellipsis && !columnItem.toolTip,
         'Selected': hasSelectedClassName,
       }
     )
+
+    let content = text
     
     if(place === 'middle' && columnItem.fixed === 'left') {
       content = ''
@@ -330,19 +334,18 @@ export default class AntTableVirtualized extends React.Component {
         if(backgroundColor) {
           styles.backgroundColor = backgroundColor
         }
-      } else {
+      }
 
-        let toolTip = typeof columnItem.toolTip === 'boolean' ? {} : columnItem.toolTip
+      let toolTip = typeof columnItem.toolTip === 'boolean' ? {} : columnItem.toolTip
         if(columnItem.ellipsis && toolTip) {
           content = (
-            <Tooltip title={content} {...toolTip}>
+            <Tooltip title={text} {...toolTip}>
               <div className="Ellipsis">
                 {content}
               </div>
             </Tooltip>
           )
         }
-      }
     }
 
     return (
@@ -426,7 +429,7 @@ export default class AntTableVirtualized extends React.Component {
           return (
             <div
               ref={this.containerRef}
-              className={classNames(classPrefix, { Bordered: bordered })}
+              className={classNames(classPrefix, this.instanceKey, { Bordered: bordered })}
               style={{ width, height }}
             >
               {/* placeholder when no data */}
@@ -780,16 +783,48 @@ export default class AntTableVirtualized extends React.Component {
   }
 
   highlightAfterClick = rowIndex => {
-    if(this.props.clickHighlight && rowIndex !== this.clickedRowIndex) {
-      this.containerRef.current
-        .querySelectorAll('.Click-Highlight')
-        .forEach(el => el.classList.remove('Click-Highlight'))
+    const { clickHighlight } = this.props
+    const isColorValue = typeof clickHighlight === 'string'
 
-      this.containerRef.current
-        .querySelectorAll(`[data-row-index="${rowIndex}"]`)
-        .forEach(el => el.classList.add('Click-Highlight'))
+    if(clickHighlight && rowIndex !== this.state.clickedRowIndex) {
+      this.setState({ clickedRowIndex: rowIndex })
+
+      if(isColorValue) {
+        addStylesheetRules([
+          [`.${this.instanceKey} .Cell-Body.Click-Highlight`,
+            ['background-color', clickHighlight]
+          ], 
+        ])
+      }
+
     }
+  }
+}
 
-    this.clickedRowIndex = rowIndex
+
+function addStylesheetRules (decls) {
+  var style = document.createElement('style');
+  document.getElementsByTagName('head')[0].appendChild(style);
+  if (!window.createPopup) { /* For Safari */
+     style.appendChild(document.createTextNode(''));
+  }
+  var s = document.styleSheets[document.styleSheets.length - 1];
+  for (var i=0, dl = decls.length; i < dl; i++) {
+      var j = 1, decl = decls[i], selector = decl[0], rulesStr = '';
+      if (Object.prototype.toString.call(decl[1][0]) === '[object Array]') {
+          decl = decl[1];
+          j = 0;
+      }
+      for (var rl=decl.length; j < rl; j++) {
+          var rule = decl[j];
+          rulesStr += rule[0] + ':' + rule[1] + (rule[2] ? ' !important' : '') + ';\n';
+      }
+
+      if (s.insertRule) {
+          s.insertRule(selector + '{' + rulesStr + '}', s.cssRules.length);
+      }
+      else { /* IE */
+          s.addRule(selector, rulesStr, -1);
+      }
   }
 }
