@@ -62,27 +62,27 @@ export default class AntTableVirtualized extends React.Component {
     }
 
     // Handle data checked and disabled
-    if(rowSelection) {
-      const { selectedRowKeys, getCheckboxProps, onChange } = rowSelection
+    // if(rowSelection) {
+    //   const { selectedRowKeys, getCheckboxProps, onChange } = rowSelection
 
-      let _selectedRowKeys = [...selectedRowKeys]
-      let _selectedRows = []
+    //   let _selectedRowKeys = [...selectedRowKeys]
+    //   let _selectedRows = []
 
-      dataSource.forEach((item, index) => {
-        let checkboxProps = getCheckboxProps(item)
-        if(checkboxProps.disabled && checkboxProps.checked && !selectedRowKeys.some(i => i === index)) {
-          _selectedRowKeys.push(index)
-        }
-      })
+    //   dataSource.forEach((item, index) => {
+    //     let checkboxProps = getCheckboxProps(item)
+    //     if(checkboxProps.disabled && checkboxProps.checked && !selectedRowKeys.some(i => i === index)) {
+    //       _selectedRowKeys.push(index)
+    //     }
+    //   })
 
-      // Just ensure data ascending sort by index
-      if(_selectedRowKeys.length !== selectedRowKeys.length) {
-        _selectedRowKeys.sort((a, b) => a - b)
-        _selectedRowKeys.forEach(key => _selectedRows.push(dataSource[key]))
-        onChange(_selectedRowKeys, _selectedRows)
-      }
+    //   // Just ensure data ascending sort by index
+    //   if(_selectedRowKeys.length !== selectedRowKeys.length) {
+    //     _selectedRowKeys.sort((a, b) => a - b)
+    //     _selectedRowKeys.forEach(key => _selectedRows.push(dataSource[key]))
+    //     onChange(_selectedRowKeys, _selectedRows)
+    //   }
 
-    }
+    // }
   }
 
   columnsSortConf = () => {
@@ -127,12 +127,11 @@ export default class AntTableVirtualized extends React.Component {
           }
 
           const checkboxProps = rowSelection.getCheckboxProps(record)
-          let checked = selectedRowKeys.some(i => i === index)
+          checkboxProps.checked = selectedRowKeys.some(i => i === index)
 
           return (
             <Checkbox
               {...checkboxProps}
-              checked={checked}
               onClick={ e => this.onCheckboxClick(index, e) }
             />
           )
@@ -237,7 +236,8 @@ export default class AntTableVirtualized extends React.Component {
     const classes = classNames(
       'Cell Cell-Head',
       {
-        'Sort': !!columnItem['sort']
+        'Sortable': !!columnItem['sort'],
+        'Sorting': !!this.state.columnsSortConf[columnItem['dataIndex']]
       }
     )
 
@@ -270,7 +270,6 @@ export default class AntTableVirtualized extends React.Component {
 
     // when rowSecection prop available
     if(columnItem.internalUseOnly) {
-
       const { dataSource, rowSelection: { selectedRowKeys } } = this.props
       const checked = !!dataSource.length && selectedRowKeys.length === dataSource.length
       const indeterminate = checked ? false : selectedRowKeys.length ? true : false
@@ -278,7 +277,8 @@ export default class AntTableVirtualized extends React.Component {
       content = (
         <Checkbox
           disabled={!dataSource.length}
-          defaultChecked={checked}
+          checked={checked}
+          // defaultChecked={checked}
           indeterminate={indeterminate}
           onClick={ e => this.onCheckboxClick(-1, e) }
         />
@@ -536,7 +536,7 @@ export default class AntTableVirtualized extends React.Component {
                 </div>
 
                 {
-                  this.columnsConf.right &&
+                  this.columnsConf.right > 0 &&
                   <div
                     className={classNames(
                       'Right-Grid-Wrapper',
@@ -734,6 +734,7 @@ export default class AntTableVirtualized extends React.Component {
   }
 
   onCheckboxClick = (rowIndex, event) => {
+    // debugger
     event.stopPropagation()
 
     const checked = event.target.checked
@@ -784,12 +785,11 @@ export default class AntTableVirtualized extends React.Component {
 
   highlightAfterClick = rowIndex => {
     const { clickHighlight } = this.props
+    const { clickedRowIndex } = this.state
     const isColorValue = typeof clickHighlight === 'string'
 
-    if(clickHighlight && rowIndex !== this.state.clickedRowIndex) {
-      this.setState({ clickedRowIndex: rowIndex })
-
-      if(isColorValue) {
+    if(clickHighlight && rowIndex !== clickedRowIndex) {
+      if(isColorValue && clickedRowIndex === -1) {
         addStylesheetRules([
           [`.${this.instanceKey} .Cell-Body.Click-Highlight`,
             ['background-color', clickHighlight]
@@ -797,34 +797,35 @@ export default class AntTableVirtualized extends React.Component {
         ])
       }
 
+      this.setState({ clickedRowIndex: rowIndex })
     }
   }
 }
 
 
-function addStylesheetRules (decls) {
+function addStylesheetRules(decls) {
   var style = document.createElement('style');
   document.getElementsByTagName('head')[0].appendChild(style);
   if (!window.createPopup) { /* For Safari */
-     style.appendChild(document.createTextNode(''));
+    style.appendChild(document.createTextNode(''));
   }
   var s = document.styleSheets[document.styleSheets.length - 1];
-  for (var i=0, dl = decls.length; i < dl; i++) {
-      var j = 1, decl = decls[i], selector = decl[0], rulesStr = '';
-      if (Object.prototype.toString.call(decl[1][0]) === '[object Array]') {
-          decl = decl[1];
-          j = 0;
-      }
-      for (var rl=decl.length; j < rl; j++) {
-          var rule = decl[j];
-          rulesStr += rule[0] + ':' + rule[1] + (rule[2] ? ' !important' : '') + ';\n';
-      }
+  for (var i = 0, dl = decls.length; i < dl; i++) {
+    var j = 1, decl = decls[i], selector = decl[0], rulesStr = '';
+    if (Object.prototype.toString.call(decl[1][0]) === '[object Array]') {
+      decl = decl[1];
+      j = 0;
+    }
+    for (var rl = decl.length; j < rl; j++) {
+      var rule = decl[j];
+      rulesStr += rule[0] + ':' + rule[1] + (rule[2] ? ' !important' : '') + ';\n';
+    }
 
-      if (s.insertRule) {
-          s.insertRule(selector + '{' + rulesStr + '}', s.cssRules.length);
-      }
-      else { /* IE */
-          s.addRule(selector, rulesStr, -1);
-      }
+    if (s.insertRule) {
+      s.insertRule(selector + '{' + rulesStr + '}', s.cssRules.length);
+    }
+    else { /* IE */
+      s.addRule(selector, rulesStr, -1);
+    }
   }
 }
