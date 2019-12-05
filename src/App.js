@@ -27,7 +27,7 @@ class App extends React.Component {
     this.getData(current, size)
   }
 
-  getData = (current = 1, size = 10) => {
+  getData = (current = 1, size = 4) => {
     Axios
       .post('http://127.0.0.1:8360/index/getData', { current, size })
       .then(rs => {
@@ -43,7 +43,8 @@ class App extends React.Component {
       // fixed: 'left',
       selectedRowKeys: this.state.selectedRowKeys,
       getCheckboxProps: record => ({
-        disabled: record.index === 1,
+        // disabled: record.index === 1,
+        defaultChecked: record.index === 1,
         // checked: record.index === 1,
       }),
       onChange: (selectedRowKeys, selectedRows) => {
@@ -54,7 +55,7 @@ class App extends React.Component {
 
       },
       onSelectAll: (selected, selectedRows, changeRows) => {
-        console.log(selected, selectedRows, changeRows)
+        // console.log(selected, selectedRows, changeRows)
       }
     }
 
@@ -92,7 +93,6 @@ class App extends React.Component {
             }
           }}
           rowSelection={rowSelection}
-          // pagination={false}
           pagination={pagination}
           placeholder={
             <div style={{

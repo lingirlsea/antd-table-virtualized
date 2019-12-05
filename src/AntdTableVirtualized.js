@@ -8,6 +8,7 @@ import { Icon, Tooltip, Checkbox, Pagination } from 'antd'
 import './AntdTableVirtualized.scss'
 
 const classPrefix = 'Antd-Table-Virtualized'
+const noopReturnEmptyObject = () => ({})
 
 export default class AntTableVirtualized extends React.Component {
 
@@ -17,6 +18,7 @@ export default class AntTableVirtualized extends React.Component {
     clickHighlight: false,
     onRow: () => ({}),
     pagination: false,
+    multipleSort: false,
   }
 
   constructor(props) {
@@ -45,6 +47,8 @@ export default class AntTableVirtualized extends React.Component {
 
     this.prevPage = 1
     this.page = 1
+    // used when row set defaultChecded=true for first update
+    this.firstUpdate = true
 
     this.columnsConf = this.columnsConf()
 
@@ -62,27 +66,40 @@ export default class AntTableVirtualized extends React.Component {
     }
 
     // Handle data checked and disabled
-    // if(rowSelection) {
-    //   const { selectedRowKeys, getCheckboxProps, onChange } = rowSelection
+    if(rowSelection) {
+      const { selectedRowKeys, getCheckboxProps, onChange } = rowSelection
 
-    //   let _selectedRowKeys = [...selectedRowKeys]
-    //   let _selectedRows = []
+      let _selectedRowKeys = [...selectedRowKeys]
+      let _selectedRows = []
 
-    //   dataSource.forEach((item, index) => {
-    //     let checkboxProps = getCheckboxProps(item)
-    //     if(checkboxProps.disabled && checkboxProps.checked && !selectedRowKeys.some(i => i === index)) {
-    //       _selectedRowKeys.push(index)
-    //     }
-    //   })
+      dataSource.forEach((item, index) => {
+        let checkboxProps = getCheckboxProps(item)
+        let exist = selectedRowKeys.some(i => i === index)
 
-    //   // Just ensure data ascending sort by index
-    //   if(_selectedRowKeys.length !== selectedRowKeys.length) {
-    //     _selectedRowKeys.sort((a, b) => a - b)
-    //     _selectedRowKeys.forEach(key => _selectedRows.push(dataSource[key]))
-    //     onChange(_selectedRowKeys, _selectedRows)
-    //   }
+        if(!exist) {
+          if(checkboxProps.disabled) {
+            if(checkboxProps.defaultChecked || checkboxProps.checked) {
+              _selectedRowKeys.push(index)
+            }
+          } else {
 
-    // }
+            if(checkboxProps.checked || (checkboxProps.defaultChecked && this.firstUpdate)) {
+              _selectedRowKeys.push(index)
+            }
+          }
+        }
+      })
+
+      // Just ensure data ascending sort by index
+      if(_selectedRowKeys.length !== selectedRowKeys.length) {
+        _selectedRowKeys.sort((a, b) => a - b)
+        _selectedRowKeys.forEach(key => _selectedRows.push(dataSource[key]))
+        onChange(_selectedRowKeys, _selectedRows)
+      }
+
+    }
+
+    this.firstUpdate = false
   }
 
   columnsSortConf = () => {
@@ -127,6 +144,12 @@ export default class AntTableVirtualized extends React.Component {
           }
 
           const checkboxProps = rowSelection.getCheckboxProps(record)
+
+          let keys = Object.keys(checkboxProps)
+          if(keys.indexOf('defaultChecked') > -1 && keys.indexOf('checked') > -1) {
+            throw Error(`defaultChecked and checked can not be set at the same time in getCheckboxProps which in rowSelection prop`)
+          }
+
           checkboxProps.checked = selectedRowKeys.some(i => i === index)
 
           return (
@@ -278,7 +301,6 @@ export default class AntTableVirtualized extends React.Component {
         <Checkbox
           disabled={!dataSource.length}
           checked={checked}
-          // defaultChecked={checked}
           indeterminate={indeterminate}
           onClick={ e => this.onCheckboxClick(-1, e) }
         />
@@ -730,11 +752,11 @@ export default class AntTableVirtualized extends React.Component {
 
   onPaginationChange = (page, pageSize) => {
     this.page = page
+    this.firstUpdate = true
     this.props.pagination.onChange(page, pageSize)
   }
 
   onCheckboxClick = (rowIndex, event) => {
-    // debugger
     event.stopPropagation()
 
     const checked = event.target.checked
@@ -746,37 +768,50 @@ export default class AntTableVirtualized extends React.Component {
     let changeRows = []
 
     if(rowIndex === -1) {
-      let _selectedRows = []
-      let _selectedRowKeys = []
-
       dataSource.forEach((item, index) => {
-        if(!copySelectedRowKeys.some(i => i === index)) {
-          changeRows.push(item)
-        }
+        let exist = copySelectedRowKeys.some(i => i === index)
+        let disabled = getCheckboxProps(item).disabled
 
-        if(!getCheckboxProps(item).disabled) {
-          _selectedRows.push(item)
-          _selectedRowKeys.push(index)
+        if(!disabled) {
+          if(exist !== checked) {
+            changeRows.push(item)
+          }
+  
+          if(checked) {
+            if(!exist) {
+              selectedRows.push(item)
+              copySelectedRowKeys.push(index)
+            }
+          } else {
+            if(exist) {
+              let i = copySelectedRowKeys.indexOf(index)
+              copySelectedRowKeys.splice(i, 1)
+            }
+          }
         }
       })
 
-      selectedRows = checked ? _selectedRows : []
-      copySelectedRowKeys = checked ? _selectedRowKeys : []
-
+      // when contain disabled row, we should jump out after checkall
+      if(selectedRows.length === 0) {
+        copySelectedRowKeys = []
+      }
+      
+      copySelectedRowKeys.sort((a, b) => a - b)
       onSelectAll && onSelectAll(checked, selectedRows, changeRows)
     } else {
 
       if(checked) {
-        copySelectedRowKeys.push(rowIndex)
-        copySelectedRowKeys.sort((a, b) => a - b)
-  
+        if(copySelectedRowKeys.indexOf(rowIndex) === -1) {
+          copySelectedRowKeys.push(rowIndex)
+          copySelectedRowKeys.sort((a, b) => a - b)
+        }
+        
       } else {
-        let index = copySelectedRowKeys.findIndex(index => index === rowIndex)
+        let index = copySelectedRowKeys.indexOf(rowIndex)
         copySelectedRowKeys.splice(index, 1)
       }
 
       copySelectedRowKeys.forEach(index => selectedRows.push(dataSource[index]))
-
       onSelect && onSelect(dataSource[rowIndex], checked, copySelectedRowKeys, event.nativeEvent)
     }
 
@@ -801,7 +836,6 @@ export default class AntTableVirtualized extends React.Component {
     }
   }
 }
-
 
 function addStylesheetRules(decls) {
   var style = document.createElement('style');
