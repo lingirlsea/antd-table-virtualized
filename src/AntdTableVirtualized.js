@@ -67,7 +67,7 @@ export default class AntTableVirtualized extends React.Component {
 
     // Handle data checked and disabled
     if(rowSelection) {
-      const { selectedRowKeys, getCheckboxProps, onChange } = rowSelection
+      const { selectedRowKeys, getCheckboxProps = noopReturnEmptyObject, onChange } = rowSelection
 
       let _selectedRowKeys = [...selectedRowKeys]
       let _selectedRows = []
@@ -90,7 +90,7 @@ export default class AntTableVirtualized extends React.Component {
         }
       })
 
-      // Just ensure data ascending sort by index
+      // Just ensure data sort by index
       if(_selectedRowKeys.length !== selectedRowKeys.length) {
         _selectedRowKeys.sort((a, b) => a - b)
         _selectedRowKeys.forEach(key => _selectedRows.push(dataSource[key]))
@@ -136,14 +136,13 @@ export default class AntTableVirtualized extends React.Component {
         width: rowSelection.columnWidth || 48,
         fixed: rowSelection.fixed || 'left',
         render: (text, record, index) => {
-          const { rowSelection } = this.props
-          const selectedRowKeys = rowSelection.selectedRowKeys
+          const { rowSelection: { selectedRowKeys, getCheckboxProps = noopReturnEmptyObject } } = this.props
 
           if(!selectedRowKeys) {
             throw Error(`selectedRowKeys should be Array in rowSelection prop`)
           }
 
-          const checkboxProps = rowSelection.getCheckboxProps(record)
+          const checkboxProps = getCheckboxProps(record)
 
           let keys = Object.keys(checkboxProps)
           if(keys.indexOf('defaultChecked') > -1 && keys.indexOf('checked') > -1) {
@@ -233,7 +232,7 @@ export default class AntTableVirtualized extends React.Component {
     }
   }
 
-  onScrollRightBottom = ({ scrollLeft, scrollTop }) => {
+  onScrollRightBottom = ({ scrollTop }) => {
     const current1 = this.leftBottomGridRef.current
     const current2 = this.middleBottomGridRef.current
 
@@ -761,7 +760,7 @@ export default class AntTableVirtualized extends React.Component {
 
     const checked = event.target.checked
     const { dataSource } = this.props
-    const { selectedRowKeys, onChange, onSelect, onSelectAll, getCheckboxProps } = this.props.rowSelection
+    const { selectedRowKeys, onChange, onSelect, onSelectAll, getCheckboxProps = noopReturnEmptyObject } = this.props.rowSelection
 
     let copySelectedRowKeys = [...selectedRowKeys]
     let selectedRows = []

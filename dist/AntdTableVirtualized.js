@@ -57,6 +57,10 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var classPrefix = 'Antd-Table-Virtualized';
 
+var noopReturnEmptyObject = function noopReturnEmptyObject() {
+  return {};
+};
+
 var AntTableVirtualized =
 /*#__PURE__*/
 function (_React$Component) {
@@ -105,19 +109,26 @@ function (_React$Component) {
           width: rowSelection.columnWidth || 48,
           fixed: rowSelection.fixed || 'left',
           render: function render(text, record, index) {
-            var rowSelection = _this.props.rowSelection;
-            var selectedRowKeys = rowSelection.selectedRowKeys;
+            var _this$props$rowSelect = _this.props.rowSelection,
+                selectedRowKeys = _this$props$rowSelect.selectedRowKeys,
+                _this$props$rowSelect2 = _this$props$rowSelect.getCheckboxProps,
+                getCheckboxProps = _this$props$rowSelect2 === void 0 ? noopReturnEmptyObject : _this$props$rowSelect2;
 
             if (!selectedRowKeys) {
               throw Error("selectedRowKeys should be Array in rowSelection prop");
             }
 
-            var checkboxProps = rowSelection.getCheckboxProps(record);
-            var checked = selectedRowKeys.some(function (i) {
+            var checkboxProps = getCheckboxProps(record);
+            var keys = Object.keys(checkboxProps);
+
+            if (keys.indexOf('defaultChecked') > -1 && keys.indexOf('checked') > -1) {
+              throw Error("defaultChecked and checked can not be set at the same time in getCheckboxProps which in rowSelection prop");
+            }
+
+            checkboxProps.checked = selectedRowKeys.some(function (i) {
               return i === index;
             });
             return _react.default.createElement(_antd.Checkbox, _extends({}, checkboxProps, {
-              checked: checked,
               onClick: function onClick(e) {
                 return _this.onCheckboxClick(index, e);
               }
@@ -209,8 +220,7 @@ function (_React$Component) {
     };
 
     _this.onScrollRightBottom = function (_ref4) {
-      var scrollLeft = _ref4.scrollLeft,
-          scrollTop = _ref4.scrollTop;
+      var scrollTop = _ref4.scrollTop;
       var current1 = _this.leftBottomGridRef.current;
       var current2 = _this.middleBottomGridRef.current;
 
@@ -243,7 +253,8 @@ function (_React$Component) {
       var columnItem = _this.columnsConf["".concat(place, "Columns")][columnIndex];
 
       var classes = (0, _classnames.default)('Cell Cell-Head', {
-        'Sort': !!columnItem['sort']
+        'Sortable': !!columnItem['sort'],
+        'Sorting': !!_this.state.columnsSortConf[columnItem['dataIndex']]
       });
       var content = columnItem['title'];
 
@@ -285,7 +296,7 @@ function (_React$Component) {
         var indeterminate = checked ? false : selectedRowKeys.length ? true : false;
         content = _react.default.createElement(_antd.Checkbox, {
           disabled: !dataSource.length,
-          defaultChecked: checked,
+          checked: checked,
           indeterminate: indeterminate,
           onClick: function onClick(e) {
             return _this.onCheckboxClick(-1, e);
@@ -315,7 +326,7 @@ function (_React$Component) {
       var columnItem = _this.columnsConf["".concat(place, "Columns")][columnIndex];
 
       var key = columnItem['dataIndex'];
-      var content = dataSource[rowIndex][key];
+      var text = dataSource[rowIndex][key];
       var hasSelectedClassName = false;
 
       if (rowSelection) {
@@ -329,10 +340,11 @@ function (_React$Component) {
       });
 
       var classes = (0, _classnames.default)('Cell Cell-Body', striped ? rowIndex % 2 ? 'Cell-Even' : 'Cell-Odd' : '', {
-        'Click-Highlight': _this.clickedRowIndex === rowIndex,
+        'Click-Highlight': _this.state.clickedRowIndex === rowIndex,
         'Ellipsis': columnItem.ellipsis && !columnItem.toolTip,
         'Selected': hasSelectedClassName
       });
+      var content = text;
 
       if (place === 'middle' && columnItem.fixed === 'left') {
         content = '';
@@ -344,16 +356,16 @@ function (_React$Component) {
           if (backgroundColor) {
             styles.backgroundColor = backgroundColor;
           }
-        } else {
-          var toolTip = typeof columnItem.toolTip === 'boolean' ? {} : columnItem.toolTip;
+        }
 
-          if (columnItem.ellipsis && toolTip) {
-            content = _react.default.createElement(_antd.Tooltip, _extends({
-              title: content
-            }, toolTip), _react.default.createElement("div", {
-              className: "Ellipsis"
-            }, content));
-          }
+        var toolTip = typeof columnItem.toolTip === 'boolean' ? {} : columnItem.toolTip;
+
+        if (columnItem.ellipsis && toolTip) {
+          content = _react.default.createElement(_antd.Tooltip, _extends({
+            title: text
+          }, toolTip), _react.default.createElement("div", {
+            className: "Ellipsis"
+          }, content));
         }
       }
 
@@ -578,6 +590,7 @@ function (_React$Component) {
 
     _this.onPaginationChange = function (page, pageSize) {
       _this.page = page;
+      _this.firstUpdate = true;
 
       _this.props.pagination.onChange(page, pageSize);
     };
@@ -586,12 +599,13 @@ function (_React$Component) {
       event.stopPropagation();
       var checked = event.target.checked;
       var dataSource = _this.props.dataSource;
-      var _this$props$rowSelect = _this.props.rowSelection,
-          selectedRowKeys = _this$props$rowSelect.selectedRowKeys,
-          onChange = _this$props$rowSelect.onChange,
-          onSelect = _this$props$rowSelect.onSelect,
-          onSelectAll = _this$props$rowSelect.onSelectAll,
-          getCheckboxProps = _this$props$rowSelect.getCheckboxProps;
+      var _this$props$rowSelect3 = _this.props.rowSelection,
+          selectedRowKeys = _this$props$rowSelect3.selectedRowKeys,
+          onChange = _this$props$rowSelect3.onChange,
+          onSelect = _this$props$rowSelect3.onSelect,
+          onSelectAll = _this$props$rowSelect3.onSelectAll,
+          _this$props$rowSelect4 = _this$props$rowSelect3.getCheckboxProps,
+          getCheckboxProps = _this$props$rowSelect4 === void 0 ? noopReturnEmptyObject : _this$props$rowSelect4;
 
       var copySelectedRowKeys = _toConsumableArray(selectedRowKeys);
 
@@ -599,34 +613,49 @@ function (_React$Component) {
       var changeRows = [];
 
       if (rowIndex === -1) {
-        var _selectedRows = [];
-        var _selectedRowKeys = [];
         dataSource.forEach(function (item, index) {
-          if (!copySelectedRowKeys.some(function (i) {
+          var exist = copySelectedRowKeys.some(function (i) {
             return i === index;
-          })) {
-            changeRows.push(item);
-          }
+          });
+          var disabled = getCheckboxProps(item).disabled;
 
-          if (!getCheckboxProps(item).disabled) {
-            _selectedRows.push(item);
+          if (!disabled) {
+            if (exist !== checked) {
+              changeRows.push(item);
+            }
 
-            _selectedRowKeys.push(index);
+            if (checked) {
+              if (!exist) {
+                selectedRows.push(item);
+                copySelectedRowKeys.push(index);
+              }
+            } else {
+              if (exist) {
+                var i = copySelectedRowKeys.indexOf(index);
+                copySelectedRowKeys.splice(i, 1);
+              }
+            }
           }
+        }); // when contain disabled row, we should jump out after checkall
+
+        if (selectedRows.length === 0) {
+          copySelectedRowKeys = [];
+        }
+
+        copySelectedRowKeys.sort(function (a, b) {
+          return a - b;
         });
-        selectedRows = checked ? _selectedRows : [];
-        copySelectedRowKeys = checked ? _selectedRowKeys : [];
         onSelectAll && onSelectAll(checked, selectedRows, changeRows);
       } else {
         if (checked) {
-          copySelectedRowKeys.push(rowIndex);
-          copySelectedRowKeys.sort(function (a, b) {
-            return a - b;
-          });
+          if (copySelectedRowKeys.indexOf(rowIndex) === -1) {
+            copySelectedRowKeys.push(rowIndex);
+            copySelectedRowKeys.sort(function (a, b) {
+              return a - b;
+            });
+          }
         } else {
-          var index = copySelectedRowKeys.findIndex(function (index) {
-            return index === rowIndex;
-          });
+          var index = copySelectedRowKeys.indexOf(rowIndex);
           copySelectedRowKeys.splice(index, 1);
         }
 
@@ -640,24 +669,28 @@ function (_React$Component) {
     };
 
     _this.highlightAfterClick = function (rowIndex) {
-      if (_this.props.clickHighlight && rowIndex !== _this.clickedRowIndex) {
-        _this.containerRef.current.querySelectorAll('.Click-Highlight').forEach(function (el) {
-          return el.classList.remove('Click-Highlight');
-        });
+      var clickHighlight = _this.props.clickHighlight;
+      var clickedRowIndex = _this.state.clickedRowIndex;
+      var isColorValue = typeof clickHighlight === 'string';
 
-        _this.containerRef.current.querySelectorAll("[data-row-index=\"".concat(rowIndex, "\"]")).forEach(function (el) {
-          return el.classList.add('Click-Highlight');
+      if (clickHighlight && rowIndex !== clickedRowIndex) {
+        if (isColorValue && clickedRowIndex === -1) {
+          addStylesheetRules([[".".concat(_this.instanceKey, " .Cell-Body.Click-Highlight"), ['background-color', clickHighlight]]]);
+        }
+
+        _this.setState({
+          clickedRowIndex: rowIndex
         });
       }
-
-      _this.clickedRowIndex = rowIndex;
     };
 
     _this.state = {
       showLeftShadow: false,
       showRightShadow: true,
+      clickedRowIndex: -1,
       columnsSortConf: _this.columnsSortConf()
     };
+    _this.instanceKey = "".concat(classPrefix, "-").concat(String(Math.random()).replace('.', ''));
     _this.containerRef = _react.default.createRef();
     _this.leftTopGridRef = _react.default.createRef();
     _this.leftBottomGridRef = _react.default.createRef();
@@ -667,9 +700,10 @@ function (_React$Component) {
     _this.rightTopGridRef = _react.default.createRef();
     _this.rightBottomGridRef = _react.default.createRef();
     _this.prevPage = 1;
-    _this.page = 1;
-    _this.columnsConf = _this.columnsConf();
-    _this.clickedRowIndex = -1; // horizontal scrollbar size
+    _this.page = 1; // used when row set defaultChecded=true for first update
+
+    _this.firstUpdate = true;
+    _this.columnsConf = _this.columnsConf(); // horizontal scrollbar size
 
     _this.horizontalScrollbarSize = (0, _scrollbarSize.default)();
     _this.scrollbarSize = (0, _scrollbarSize.default)();
@@ -679,6 +713,8 @@ function (_React$Component) {
   _createClass(AntTableVirtualized, [{
     key: "componentDidUpdate",
     value: function componentDidUpdate() {
+      var _this2 = this;
+
       var _this$props5 = this.props,
           dataSource = _this$props5.dataSource,
           rowSelection = _this$props5.rowSelection;
@@ -693,7 +729,8 @@ function (_React$Component) {
 
       if (rowSelection) {
         var selectedRowKeys = rowSelection.selectedRowKeys,
-            getCheckboxProps = rowSelection.getCheckboxProps,
+            _rowSelection$getChec = rowSelection.getCheckboxProps,
+            getCheckboxProps = _rowSelection$getChec === void 0 ? noopReturnEmptyObject : _rowSelection$getChec,
             onChange = rowSelection.onChange;
 
         var _selectedRowKeys = _toConsumableArray(selectedRowKeys);
@@ -701,13 +738,22 @@ function (_React$Component) {
         var _selectedRows = [];
         dataSource.forEach(function (item, index) {
           var checkboxProps = getCheckboxProps(item);
-
-          if (checkboxProps.disabled && checkboxProps.checked && !selectedRowKeys.some(function (i) {
+          var exist = selectedRowKeys.some(function (i) {
             return i === index;
-          })) {
-            _selectedRowKeys.push(index);
+          });
+
+          if (!exist) {
+            if (checkboxProps.disabled) {
+              if (checkboxProps.defaultChecked || checkboxProps.checked) {
+                _selectedRowKeys.push(index);
+              }
+            } else {
+              if (checkboxProps.checked || checkboxProps.defaultChecked && _this2.firstUpdate) {
+                _selectedRowKeys.push(index);
+              }
+            }
           }
-        }); // Just ensure data ascending sort by index
+        }); // Just ensure data sort by index
 
         if (_selectedRowKeys.length !== selectedRowKeys.length) {
           _selectedRowKeys.sort(function (a, b) {
@@ -721,11 +767,13 @@ function (_React$Component) {
           onChange(_selectedRowKeys, _selectedRows);
         }
       }
+
+      this.firstUpdate = false;
     }
   }, {
     key: "render",
     value: function render() {
-      var _this2 = this;
+      var _this3 = this;
 
       var _this$props6 = this.props,
           rowHeadHeight = _this$props6.rowHeadHeight,
@@ -744,19 +792,19 @@ function (_React$Component) {
       }, _react.default.createElement(_reactVirtualizedAutoSizer.default, null, function (_ref13) {
         var height = _ref13.height,
             width = _ref13.width;
-        var diff = width - _this2.columnsConf.totalWidth - _this2.scrollbarSize - 2;
+        var diff = width - _this3.columnsConf.totalWidth - _this3.scrollbarSize - 2;
 
         if (diff >= 0) {
-          _this2.horizontalScrollbarSize = 0;
+          _this3.horizontalScrollbarSize = 0;
         } // Minus the border top 1px
 
 
-        var bodyHeight = height - rowHeadHeight - _this2.horizontalScrollbarSize - 1;
+        var bodyHeight = height - rowHeadHeight - _this3.horizontalScrollbarSize - 1;
         height = height - paginationHeight;
         bodyHeight = bodyHeight - paginationHeight;
 
-        for (var i = 0; i < _this2.columnsConf.middleColumns.length; i++) {
-          var item = _this2.columnsConf.middleColumns[i];
+        for (var i = 0; i < _this3.columnsConf.middleColumns.length; i++) {
+          var item = _this3.columnsConf.middleColumns[i];
 
           if (item.width === 0) {
             if (diff >= 0) {
@@ -770,8 +818,8 @@ function (_React$Component) {
         }
 
         return _react.default.createElement("div", {
-          ref: _this2.containerRef,
-          className: (0, _classnames.default)(classPrefix, {
+          ref: _this3.containerRef,
+          className: (0, _classnames.default)(classPrefix, _this3.instanceKey, {
             Bordered: bordered
           }),
           style: {
@@ -802,33 +850,33 @@ function (_React$Component) {
           }
         }, _react.default.createElement(_reactWindow.VariableSizeGrid, {
           className: (0, _classnames.default)('Left-Top-Grid'),
-          columnCount: _this2.columnsConf.left,
+          columnCount: _this3.columnsConf.left,
           columnWidth: function columnWidth(index) {
-            return _this2.columnsConf.leftColumns[index].width;
+            return _this3.columnsConf.leftColumns[index].width;
           },
-          height: rowHeadHeight + _this2.scrollbarSize,
+          height: rowHeadHeight + _this3.scrollbarSize,
           rowCount: 1,
-          rowHeight: _this2.rowHeadHeight,
-          width: _this2.columnsConf.leftWidth,
-          ref: _this2.leftTopGridRef
-        }, _this2.renderLeftTopCell)), _react.default.createElement("div", {
+          rowHeight: _this3.rowHeadHeight,
+          width: _this3.columnsConf.leftWidth,
+          ref: _this3.leftTopGridRef
+        }, _this3.renderLeftTopCell)), _react.default.createElement("div", {
           className: "Left-Bottom-Grid-Wrapper",
           style: {
-            width: _this2.columnsConf.leftWidth
+            width: _this3.columnsConf.leftWidth
           }
         }, _react.default.createElement(_reactWindow.VariableSizeGrid, {
           className: (0, _classnames.default)('Left-Bottom-Grid'),
-          columnCount: _this2.columnsConf.left,
+          columnCount: _this3.columnsConf.left,
           columnWidth: function columnWidth(index) {
-            return _this2.columnsConf.leftColumns[index].width;
+            return _this3.columnsConf.leftColumns[index].width;
           },
           height: bodyHeight,
           rowCount: rowCount,
-          rowHeight: _this2.rowHeight,
-          width: _this2.columnsConf.leftWidth + _this2.scrollbarSize,
-          ref: _this2.leftBottomGridRef,
-          onScroll: _this2.onScrollLeftBottom
-        }, _this2.renderLeftBottomCell))), _react.default.createElement("div", {
+          rowHeight: _this3.rowHeight,
+          width: _this3.columnsConf.leftWidth + _this3.scrollbarSize,
+          ref: _this3.leftBottomGridRef,
+          onScroll: _this3.onScrollLeftBottom
+        }, _this3.renderLeftBottomCell))), _react.default.createElement("div", {
           className: "Middle-Grid-Wrapper",
           style: {
             height: height
@@ -842,38 +890,38 @@ function (_React$Component) {
         }, _react.default.createElement(_reactWindow.VariableSizeGrid, {
           className: (0, _classnames.default)('Middle-Top-Grid'),
           style: {
-            paddingLeft: _this2.columnsConf.rightWidth
+            paddingLeft: _this3.columnsConf.rightWidth
           },
-          columnCount: _this2.columnsConf.middleColumns.length,
+          columnCount: _this3.columnsConf.middleColumns.length,
           columnWidth: function columnWidth(index) {
-            return _this2.columnsConf.middleColumns[index].width;
+            return _this3.columnsConf.middleColumns[index].width;
           },
-          height: rowHeadHeight + _this2.scrollbarSize,
+          height: rowHeadHeight + _this3.scrollbarSize,
           rowCount: 1,
-          rowHeight: _this2.rowHeadHeight,
-          width: width - _this2.scrollbarSize - 2,
-          ref: _this2.middleTopGridRef,
-          onScroll: _this2.onScrollMiddleTop
-        }, _this2.renderMiddleTopCell)), _react.default.createElement("div", {
+          rowHeight: _this3.rowHeadHeight,
+          width: width - _this3.scrollbarSize - 2,
+          ref: _this3.middleTopGridRef,
+          onScroll: _this3.onScrollMiddleTop
+        }, _this3.renderMiddleTopCell)), _react.default.createElement("div", {
           className: "Middle-Bottom-Grid-Wrapper"
         }, _react.default.createElement(_reactWindow.VariableSizeGrid, {
           className: (0, _classnames.default)('Middle-Bottom-Grid'),
           style: {
-            paddingLeft: _this2.columnsConf.rightWidth,
+            paddingLeft: _this3.columnsConf.rightWidth,
             overflow: 'scroll'
           },
-          columnCount: _this2.columnsConf.middleColumns.length,
+          columnCount: _this3.columnsConf.middleColumns.length,
           columnWidth: function columnWidth(index) {
-            return _this2.columnsConf.middleColumns[index].width;
+            return _this3.columnsConf.middleColumns[index].width;
           },
           width: width - 2,
-          height: bodyHeight + (_this2.horizontalScrollbarSize || _this2.scrollbarSize),
+          height: bodyHeight + (_this3.horizontalScrollbarSize || _this3.scrollbarSize),
           rowCount: rowCount,
-          rowHeight: _this2.rowHeight,
-          innerRef: _this2.middleBottomGridInnerRef,
-          ref: _this2.middleBottomGridRef,
-          onScroll: _this2.onScrollMiddleBottom
-        }, _this2.renderMiddleBottomCell))), _this2.columnsConf.right && _react.default.createElement("div", {
+          rowHeight: _this3.rowHeight,
+          innerRef: _this3.middleBottomGridInnerRef,
+          ref: _this3.middleBottomGridRef,
+          onScroll: _this3.onScrollMiddleBottom
+        }, _this3.renderMiddleBottomCell))), _this3.columnsConf.right > 0 && _react.default.createElement("div", {
           className: (0, _classnames.default)('Right-Grid-Wrapper', {
             'With-Shadow': showRightShadow
           })
@@ -882,45 +930,45 @@ function (_React$Component) {
             'With-Shadow': !dataSource.length
           }),
           style: {
-            width: _this2.columnsConf.rightWidth + _this2.scrollbarSize,
+            width: _this3.columnsConf.rightWidth + _this3.scrollbarSize,
             height: rowHeadHeight
           }
         }, _react.default.createElement(_reactWindow.VariableSizeGrid, {
           className: (0, _classnames.default)('Right-Top-Grid'),
-          columnCount: _this2.columnsConf.right,
+          columnCount: _this3.columnsConf.right,
           columnWidth: function columnWidth(index) {
-            return _this2.columnsConf.rightColumns[index].width;
+            return _this3.columnsConf.rightColumns[index].width;
           },
-          height: rowHeadHeight + _this2.scrollbarSize,
+          height: rowHeadHeight + _this3.scrollbarSize,
           rowCount: 1,
-          rowHeight: _this2.rowHeadHeight,
-          width: _this2.columnsConf.rightWidth,
-          ref: _this2.rightTopGridRef,
-          onScroll: _this2.onScrollRightTop
-        }, _this2.renderRightTopCell)), _react.default.createElement("div", {
+          rowHeight: _this3.rowHeadHeight,
+          width: _this3.columnsConf.rightWidth,
+          ref: _this3.rightTopGridRef,
+          onScroll: _this3.onScrollRightTop
+        }, _this3.renderRightTopCell)), _react.default.createElement("div", {
           className: "Right-Bottom-Grid-Wrapper",
           style: {
-            width: _this2.columnsConf.rightWidth + _this2.scrollbarSize
+            width: _this3.columnsConf.rightWidth + _this3.scrollbarSize
           }
         }, _react.default.createElement(_reactWindow.VariableSizeGrid, {
           className: (0, _classnames.default)('Right-Bottom-Grid'),
-          columnCount: _this2.columnsConf.right,
+          columnCount: _this3.columnsConf.right,
           columnWidth: function columnWidth(index) {
-            return _this2.columnsConf.rightColumns[index].width;
+            return _this3.columnsConf.rightColumns[index].width;
           },
           height: bodyHeight,
           rowCount: rowCount,
-          rowHeight: _this2.rowHeight,
-          width: _this2.columnsConf.rightWidth + _this2.scrollbarSize,
-          ref: _this2.rightBottomGridRef,
-          onScroll: _this2.onScrollRightBottom
-        }, _this2.renderRightBottomCell)))), pagination && _react.default.createElement("div", {
+          rowHeight: _this3.rowHeight,
+          width: _this3.columnsConf.rightWidth + _this3.scrollbarSize,
+          ref: _this3.rightBottomGridRef,
+          onScroll: _this3.onScrollRightBottom
+        }, _this3.renderRightBottomCell)))), pagination && _react.default.createElement("div", {
           className: "Pagination-Wrapper",
           style: _objectSpread({
             height: paginationHeight
           }, pagination.wrapperStyle)
         }, _react.default.createElement(_antd.Pagination, _extends({}, pagination, {
-          onChange: _this2.onPaginationChange
+          onChange: _this3.onPaginationChange
         }))));
       }));
     }
@@ -937,5 +985,42 @@ AntTableVirtualized.defaultProps = {
   onRow: function onRow() {
     return {};
   },
-  pagination: false
+  pagination: false,
+  multipleSort: false
 };
+
+function addStylesheetRules(decls) {
+  var style = document.createElement('style');
+  document.getElementsByTagName('head')[0].appendChild(style);
+
+  if (!window.createPopup) {
+    /* For Safari */
+    style.appendChild(document.createTextNode(''));
+  }
+
+  var s = document.styleSheets[document.styleSheets.length - 1];
+
+  for (var i = 0, dl = decls.length; i < dl; i++) {
+    var j = 1,
+        decl = decls[i],
+        selector = decl[0],
+        rulesStr = '';
+
+    if (Object.prototype.toString.call(decl[1][0]) === '[object Array]') {
+      decl = decl[1];
+      j = 0;
+    }
+
+    for (var rl = decl.length; j < rl; j++) {
+      var rule = decl[j];
+      rulesStr += rule[0] + ':' + rule[1] + (rule[2] ? ' !important' : '') + ';\n';
+    }
+
+    if (s.insertRule) {
+      s.insertRule(selector + '{' + rulesStr + '}', s.cssRules.length);
+    } else {
+      /* IE */
+      s.addRule(selector, rulesStr, -1);
+    }
+  }
+}
