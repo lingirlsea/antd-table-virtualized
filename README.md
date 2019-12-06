@@ -6,11 +6,12 @@
 
 ## Install
 
-> # Yarn
-> yarn add antd-table-virtualized
-> # NPM
-> npm install --save antd-table-virtualized
-
+```js
+# Yarn
+yarn add antd-table-virtualized
+# NPM
+npm install --save antd-table-virtualized
+```
 
 ## Usage
 
