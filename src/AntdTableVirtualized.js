@@ -427,8 +427,8 @@ export default class AntTableVirtualized extends React.Component {
             this.horizontalScrollbarSize = 0
           }
 
-          // Minus the border top 1px
-          let bodyHeight = height - rowHeadHeight - this.horizontalScrollbarSize - 1
+          // Minus the border top & bottom 1px
+          let bodyHeight = height - rowHeadHeight - this.horizontalScrollbarSize - 2
 
           height = height - paginationHeight
           bodyHeight = bodyHeight - paginationHeight
