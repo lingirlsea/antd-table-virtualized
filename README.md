@@ -4,6 +4,16 @@
 :warning: `Note that this version is not yet stable, please do not use it in production environment`
 
 
+## Install
+
+```bash
+# Yarn
+yarn add antd-table-virtualized
+
+# NPM
+npm install --save antd-table-virtualized
+```
+
 ## Usage
 
 Please refer to src/App.js for usage, feel free to contact me <lingirlsea@gmail.com> :heart:
