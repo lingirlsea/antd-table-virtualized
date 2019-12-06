@@ -17,7 +17,7 @@ var _classnames = _interopRequireDefault(require("classnames"));
 
 var _antd = require("antd");
 
-require("./AntdTableVirtualized.scss");
+var _AntdTableVirtualized = _interopRequireDefault(require("./AntdTableVirtualized.scss"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -55,23 +55,23 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-var classPrefix = 'Antd-Table-Virtualized';
+var classPrefix = _AntdTableVirtualized.default.classPrefix;
 
 var noopReturnEmptyObject = function noopReturnEmptyObject() {
   return {};
 };
 
-var AntTableVirtualized =
+var AntdTableVirtualized =
 /*#__PURE__*/
 function (_React$Component) {
-  _inherits(AntTableVirtualized, _React$Component);
+  _inherits(AntdTableVirtualized, _React$Component);
 
-  function AntTableVirtualized(props) {
+  function AntdTableVirtualized(props) {
     var _this;
 
-    _classCallCheck(this, AntTableVirtualized);
+    _classCallCheck(this, AntdTableVirtualized);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(AntTableVirtualized).call(this, props));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(AntdTableVirtualized).call(this, props));
 
     _this.columnsSortConf = function () {
       var ret = {};
@@ -675,7 +675,9 @@ function (_React$Component) {
 
       if (clickHighlight && rowIndex !== clickedRowIndex) {
         if (isColorValue && clickedRowIndex === -1) {
-          addStylesheetRules([[".".concat(_this.instanceKey, " .Cell-Body.Click-Highlight"), ['background-color', clickHighlight]]]);
+          _this.containerRef.current.setAttribute('data-key', _this.instanceKey);
+
+          addStylesheetRules([["[data-key=\"".concat(_this.instanceKey, "\"] .Cell-Body.Click-Highlight"), ['background-color', clickHighlight]]]);
         }
 
         _this.setState({
@@ -710,7 +712,7 @@ function (_React$Component) {
     return _this;
   }
 
-  _createClass(AntTableVirtualized, [{
+  _createClass(AntdTableVirtualized, [{
     key: "componentDidUpdate",
     value: function componentDidUpdate() {
       var _this2 = this;
@@ -796,10 +798,10 @@ function (_React$Component) {
 
         if (diff >= 0) {
           _this3.horizontalScrollbarSize = 0;
-        } // Minus the border top 1px
+        } // Minus the border top & bottom 2px
 
 
-        var bodyHeight = height - rowHeadHeight - _this3.horizontalScrollbarSize - 1;
+        var bodyHeight = height - rowHeadHeight - _this3.horizontalScrollbarSize - 2;
         height = height - paginationHeight;
         bodyHeight = bodyHeight - paginationHeight;
 
@@ -819,7 +821,7 @@ function (_React$Component) {
 
         return _react.default.createElement("div", {
           ref: _this3.containerRef,
-          className: (0, _classnames.default)(classPrefix, _this3.instanceKey, {
+          className: (0, _classnames.default)(classPrefix, {
             Bordered: bordered
           }),
           style: {
@@ -974,19 +976,18 @@ function (_React$Component) {
     }
   }]);
 
-  return AntTableVirtualized;
-}(_react.default.Component);
+  return AntdTableVirtualized;
+}(_react.default.Component); // https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule
 
-exports.default = AntTableVirtualized;
-AntTableVirtualized.defaultProps = {
+
+exports.default = AntdTableVirtualized;
+AntdTableVirtualized.defaultProps = {
   rowHeight: 40,
   rowHeadHeight: 40,
   clickHighlight: false,
-  onRow: function onRow() {
-    return {};
-  },
   pagination: false,
-  multipleSort: false
+  multipleSort: false,
+  onRow: noopReturnEmptyObject
 };
 
 function addStylesheetRules(decls) {
