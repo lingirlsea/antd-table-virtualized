@@ -16,7 +16,7 @@ npm install --save antd-table-virtualized
 
 ## Usage
 
-```js
+```jsx
 
 import AntdTableVirtualized from 'antd-table-virtualized'
 
