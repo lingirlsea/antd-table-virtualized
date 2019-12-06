@@ -6,11 +6,10 @@
 
 ## Install
 
-# Yarn
-yarn add antd-table-virtualized
-
-# NPM
-npm install --save antd-table-virtualized
+> # Yarn
+> yarn add antd-table-virtualized
+> # NPM
+> npm install --save antd-table-virtualized
 
 
 ## Usage
