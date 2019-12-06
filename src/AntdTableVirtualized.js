@@ -4,21 +4,20 @@ import { VariableSizeGrid as Grid } from 'react-window'
 import scrollbarSize from 'dom-helpers/scrollbarSize'
 import classNames from 'classnames'
 import { Icon, Tooltip, Checkbox, Pagination } from 'antd'
+import style from './AntdTableVirtualized.scss'
 
-import './AntdTableVirtualized.scss'
-
-const classPrefix = 'Antd-Table-Virtualized'
+const classPrefix = style.classPrefix
 const noopReturnEmptyObject = () => ({})
 
-export default class AntTableVirtualized extends React.Component {
+export default class AntdTableVirtualized extends React.Component {
 
   static defaultProps = {
     rowHeight: 40,
     rowHeadHeight: 40,
     clickHighlight: false,
-    onRow: () => ({}),
     pagination: false,
     multipleSort: false,
+    onRow: noopReturnEmptyObject,
   }
 
   constructor(props) {
@@ -450,7 +449,7 @@ export default class AntTableVirtualized extends React.Component {
           return (
             <div
               ref={this.containerRef}
-              className={classNames(classPrefix, this.instanceKey, { Bordered: bordered })}
+              className={classNames(classPrefix, { Bordered: bordered })}
               style={{ width, height }}
             >
               {/* placeholder when no data */}
@@ -824,8 +823,9 @@ export default class AntTableVirtualized extends React.Component {
 
     if(clickHighlight && rowIndex !== clickedRowIndex) {
       if(isColorValue && clickedRowIndex === -1) {
+        this.containerRef.current.setAttribute('data-key', this.instanceKey)
         addStylesheetRules([
-          [`.${this.instanceKey} .Cell-Body.Click-Highlight`,
+          [`[data-key="${this.instanceKey}"] .Cell-Body.Click-Highlight`,
             ['background-color', clickHighlight]
           ], 
         ])
@@ -836,6 +836,7 @@ export default class AntTableVirtualized extends React.Component {
   }
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule
 function addStylesheetRules(decls) {
   var style = document.createElement('style');
   document.getElementsByTagName('head')[0].appendChild(style);

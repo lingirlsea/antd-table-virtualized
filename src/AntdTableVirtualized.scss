@@ -9,6 +9,10 @@ $color-background-14: #f5f5f5;
 
 $prefix: Antd-Table-Virtualized;
 
+:export {
+  classPrefix: $prefix
+}
+
 .#{$prefix} {
   position: relative;
   border: 1px solid $color-border;

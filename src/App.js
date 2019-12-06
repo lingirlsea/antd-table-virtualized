@@ -72,11 +72,11 @@ class App extends React.Component {
 
     return (
       <div className="App">
-        {/* <button onClick={() => {document.querySelector('button').style.display = 'none' }}>按钮</button> */}
         <AntdTableVirtulized
           striped
           bordered
           clickHighlight
+          // clickHighlight="red"
           // multipleSort
           columns={columns}
           dataSource={this.state.dataSource}
