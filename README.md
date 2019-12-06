@@ -16,14 +16,12 @@ npm install --save antd-table-virtualized
 
 ## Usage
 
-Please refer to src/App.js for usage, feel free to contact me <lingirlsea@gmail.com> :heart:
-
 ```js
 
 import AntdTableVirtualized from 'antd-table-virtualized'
 
-// Note: in order to autosize the table, you need to
-//       set the wrapper element's style property `display` to `flex`.
+// Note: in order to autosize the table, you need to set the
+//       wrapper element's style property `display` to `flex`.
 //       Otherwise the view will be blank
 
 <div style={{ dispaly: 'flex' }}>
@@ -32,6 +30,8 @@ import AntdTableVirtualized from 'antd-table-virtualized'
   />
 </div>
 ```
+
+Please refer to src/App.js for usage, feel free to contact me <lingirlsea@gmail.com> :heart:
 
 
 ## Related libraries
