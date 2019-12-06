@@ -22,7 +22,8 @@ Please refer to src/App.js for usage, feel free to contact me <lingirlsea@gmail.
 
 import AntdTableVirtualized from 'antd-table-virtualized'
 
-// Note: in order to autosize the table, you need to set the wrapper element's style property `display` to `flex`
+// Note: in order to autosize the table,
+//       you need to set the wrapper element's style property `display` to `flex`.
 <div style={{ dispaly: 'flex' }}>
   <AntdTableVirtualized
     {/* props here */}
