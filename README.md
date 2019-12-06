@@ -6,7 +6,7 @@
 
 ## Install
 
-```js
+```bash
 # Yarn
 yarn add antd-table-virtualized
 # NPM
