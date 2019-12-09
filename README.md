@@ -28,6 +28,9 @@ import AntdTableVirtualized from 'antd-table-virtualized'
   <AntdTableVirtualized
     {/* props here */}
   />
+  <div>
+    {/* other code here */}
+  </div>
 </div>
 ```
 
