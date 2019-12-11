@@ -10,7 +10,7 @@
     "react virtualized table"
   ],
   "dependencies": {
-    "antd": "^3.25.2",
+    "antd": "^3.26.1",
     "axios": "^0.19.0",
     "classnames": "^2.2.6",
     "dom-helpers": "^5.1.3",

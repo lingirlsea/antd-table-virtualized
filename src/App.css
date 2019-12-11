@@ -1,9 +1,5 @@
 @import '~antd/dist/antd.css';
 
-* {
-  box-sizing: border-box;
-}
-
 body {
   padding-top: 20px
 }
@@ -11,6 +7,10 @@ body {
 .App {
   display: flex;
   flex-direction: column;
-  height: 300px;
+  min-height: 640px;
   padding: 0 100px;
+}
+
+.App .ant-table-wrapper {
+  height: 300px;
 }

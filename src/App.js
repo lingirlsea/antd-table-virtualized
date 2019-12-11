@@ -1,7 +1,7 @@
 import React from 'react'
 import Axios from "axios"
 import AntdTableVirtulized from './AntdTableVirtualized'
-// import { Table } from 'antd'
+import { Table } from 'antd'
 import columns from './columns'
 import './App.css'
 
@@ -43,16 +43,14 @@ class App extends React.Component {
       // fixed: 'left',
       selectedRowKeys: this.state.selectedRowKeys,
       getCheckboxProps: record => ({
-        // disabled: record.index === 1,
-        defaultChecked: record.index === 1,
-        // checked: record.index === 1,
+        disabled: record.index === 1,
       }),
       onChange: (selectedRowKeys, selectedRows) => {
         // console.log(selectedRowKeys, selectedRows)
         this.setState({ selectedRowKeys })
       },
       onSelect: (record, selected, selectedRows, nativeEvent) => {
-
+        // console.log('--')
       },
       onSelectAll: (selected, selectedRows, changeRows) => {
         // console.log(selected, selectedRows, changeRows)
@@ -61,8 +59,8 @@ class App extends React.Component {
 
     const pagination = {
       total: 1000,
-      // wrapperStyle: {},
-      // height: 60,
+      wrapperStyle: { color: 'red' },
+      height: 60,
       showTotal: total => `共 ${total} 条`,
       showSizeChanger: true,
       showQuickJumper: true,
@@ -75,44 +73,56 @@ class App extends React.Component {
         <AntdTableVirtulized
           striped
           bordered
-          clickHighlight
+          // clickHighlight
           // clickHighlight="red"
-          // multipleSort
+          multipleSort
+          className="MyClassName"
           columns={columns}
           dataSource={this.state.dataSource}
           rowHeight={40}
           onRow={record => {
             return {
               onClick: event => {
-                console.log(record) 
+                console.log(record)
               },
-              onDoubleClick: event => {},
-              onContextMenu: event => {},
-              onMouseEnter: event => {},
-              onMouseLeave: event => {},
+              onDoubleClick: event => {
+                console.log('dblclick')
+              },
+              onContextMenu: event => {
+                console.log('right click')
+              },
+              onMouseEnter: event => {
+                // console.log('mouse enter')
+              },
+              onMouseLeave: event => {
+                // console.log('mouse leave')
+              },
             }
           }}
           rowSelection={rowSelection}
           pagination={pagination}
-          placeholder={
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              color: '#ccc',
-            }}>
-              暂无数据
-            </div>
-          }
+          // placeholder={
+          //   <div style={{
+          //     display: 'flex',
+          //     alignItems: 'center',
+          //     justifyContent: 'center',
+          //     height: '100%',
+          //     color: '#ccc',
+          //   }}>
+          //     暂无数据
+          //   </div>
+          // }
         />
 
-        {/* <Table
+        <Table
+          bordered
+          size="middle"
           columns={columns}
           dataSource={this.state.dataSource}
           rowSelection={rowSelection}
-          scroll={{y: 200}}
-        /> */}
+          scroll={{x: 1000, y: 300}}
+          rowKey="index"
+        />
       </div>
     )
   }

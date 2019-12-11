@@ -1,11 +1,10 @@
-//
-//
 import React from 'react'
 
 const columns = [
   {
-    fixed: 'left',
-    width: 70,
+    fixed: true,
+    // fixed: 'left',
+    width: 100,
     title: '序号',
     dataIndex: 'index',
     sort: {
@@ -17,7 +16,7 @@ const columns = [
   },
   {
     fixed: 'left',
-    width: 100,
+    width: 150,
     title: '姓名',
     dataIndex: 'name',
     sort: {
@@ -26,13 +25,13 @@ const columns = [
         console.log(sortConf)
       }
     },
-    ellipsis: true,
+    // ellipsis: true,
     toolTip: {
       placement: 'right'
     },
     render: (text, record, index) => {
       return (
-        <div className="" style={{ backgroundColor: index === 2 ? 'lightgreen' : '' }}>
+        <div style={{ backgroundColor: index === 2 ? 'lightgreen' : '' }}>
           {text}
         </div>
       )
@@ -40,12 +39,24 @@ const columns = [
   },
   {
     fixed: 'left',
-    width: 60,
+    width: 100,
     title: '身高',  
     dataIndex: 'height',
-    ellipsis: true,
+    // ellipsis: true,
     toolTip: true,
   },
+]
+
+
+Array.from({ length: 10 }).forEach((_, index) => {
+  columns.push({
+    title: `标题${index + 1}`,
+    width: 100,
+    dataIndex: 'title-' + index
+  })
+})
+
+columns.push(
   {
     fixed: 'right',
     width: 100,
@@ -57,16 +68,7 @@ const columns = [
     width: 100,
     title: '备注',
     dataIndex: 'remarks',
-  },  
-]
-
-
-Array.from({ length: 10 }).forEach((_, index) => {
-  columns.push({
-    title: `标题${index + 1}`,
-    width: 100,
-    dataIndex: 'title'
-  })
-})
+  },
+)
 
 export default columns
