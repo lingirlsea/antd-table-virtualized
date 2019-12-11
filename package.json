@@ -2,7 +2,7 @@
   "name": "antd-table-virtualized",
   "description": "React table components compatible with some antd table API",
   "author": "lingirlsea <lingirlsea@gmail.com>",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "keywords": [
     "virtualized",
     "antd table",

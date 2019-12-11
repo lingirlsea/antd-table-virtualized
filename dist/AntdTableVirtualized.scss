@@ -1,11 +1,5 @@
 $color-border: #e8e8e8;
 $color-shadow: rgba(0, 0, 0, 0.15);
-$color-background-10: #fafafa;
-$color-background-11: #e5e5e5;
-$color-background-12: #d6f2ff;
-$color-background-13: #f2f8fd;
-$color-background-14: #f5f5f5;
-
 
 $prefix: Antd-Table-Virtualized;
 
@@ -15,11 +9,12 @@ $prefix: Antd-Table-Virtualized;
 
 .#{$prefix} {
   position: relative;
-  border: 1px solid $color-border;
 
   &.Bordered {
+    border: 1px solid $color-border;
+
     .Cell-Head {
-      border-right: 1px solid transparent;
+      border-right: 1px solid $color-border;
     }
     .Cell-Body {
       border-right: 1px solid $color-border;
@@ -32,6 +27,14 @@ $prefix: Antd-Table-Virtualized;
     left: 0;
     width: 100%;
     background-color: #fff;
+
+    .Default {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: rgba(0, 0, 0, .25);
+    }
   }
 
   .Left-Grid-Wrapper {
@@ -78,8 +81,7 @@ $prefix: Antd-Table-Virtualized;
   .Left-Top-Grid-Wrapper,
   .Middle-Top-Grid-Wrapper,
   .Right-Top-Grid-Wrapper {
-    background-color: $color-background-10;
-    
+    background-color: #fafafa;
   }
 
   .Left-Top-Grid-Wrapper {
@@ -104,16 +106,22 @@ $prefix: Antd-Table-Virtualized;
     &.With-Shadow {
       box-shadow: -6px 0 6px -4px $color-shadow;
     }
+
+    .Right-Bottom-Grid {
+      overflow-x: hidden !important;
+      overflow-y: scroll !important;
+    }
   }
 
   .Cell-Head {
     display: flex;
     align-items: center;
-    padding-left: 15px;
+    padding-left: 10px;
+    border-bottom: 1px solid $color-border;
 
     &.Sorting {
       transition: background-color .3s;
-      background-color: $color-background-14;
+      background-color: #f5f5f5;
     }
 
     &.Sortable {
@@ -121,7 +129,7 @@ $prefix: Antd-Table-Virtualized;
 
       &:hover {
         transition: background-color .3s;
-        background-color: $color-background-11;
+        background-color: #e5e5e5;
         cursor: pointer;
       }
     }
@@ -152,7 +160,7 @@ $prefix: Antd-Table-Virtualized;
   .Cell-Body {
     display: flex;
     align-items: center;
-    padding-left: 15px;
+    padding-left: 10px;
     padding-right: 5px;
     border-bottom: 1px solid $color-border;
     transition: background-color .3s;
@@ -171,7 +179,7 @@ $prefix: Antd-Table-Virtualized;
 
     &.Highlight:not(.Click-Highlight) {
       transition: background-color .3s;
-      background-color: $color-background-12;
+      background-color: #e6f7ff;
     }
 
     &.Click-Highlight {
@@ -180,7 +188,7 @@ $prefix: Antd-Table-Virtualized;
     }
 
     &.Cell-Even:not(.Highlight):not(.Click-Highlight):not(.Selected) {
-      background-color: $color-background-13;
+      background-color: #f2f8fd;
     }
 
     .Ellipsis {
