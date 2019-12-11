@@ -55,15 +55,14 @@ Please refer to src/App.js for usage, feel free to contact me <lingirlsea@gmail.
 | pagination | Config of pagination.  You can ref table pagination config or full pagination [document](https://ant.design/components/pagination/), hide it by setting it to `false` | object | - |  |
 | rowSelection | Row selection config | object | null |  |
 | onRow | Set props on per row, [document](https://ant.design/components/table/#onRow-usage) | Function(record, index) | - |  |
-|
 <br>
 
 pagination also support properties below
+
 | Property | Description | Type | Default | Version |
 | ---- | ---- | ---- | ---- | ---- |
 | height | Pagination height | number | 50 |  |
 | wrapperStyle | Wrapper element style for pagination | object | - |  |
-|
 <br>
 <br>
 
@@ -78,7 +77,6 @@ Properties for row selection.
 | onChange | Callback executed when selected rows change | Function(selectedRowKeys, selectedRows) |  |  |
 | onSelect | Callback executed when select/deselect one row | Function(selectedRowKeys, selectedRows) | - |  |
 | onSelectAll | Callback executed when select/deselect all rows | Function(selected, selectedRows, changeRows) | - |  |
-|  |  |  |  |  |
 
 <br>
 <br>
@@ -94,7 +92,6 @@ One of the Table columns prop for describing the table's columns, Column has the
 | fixed |	Set column to be fixed: `true`(same as left) `'left'` `'right'` | boolean|string | - |  |
 | sort |	Column sort, see example below | object | - |  |
 | render | Renderer of the table cell. The return value should be a ReactNode | Function(text, record, index) {} | - |  |
-|
 
 ```jsx
 sort: {
