@@ -55,7 +55,7 @@ Please refer to src/App.js for usage, feel free to contact me <lingirlsea@gmail.
 | pagination | Config of pagination.  You can ref table pagination config or full pagination [document](https://ant.design/components/pagination/), hide it by setting it to `false` | object | - |  |
 | rowSelection | Row selection config | object | null |  |
 | onRow | Set props on per row, [document](https://ant.design/components/table/#onRow-usage) | Function(record, index) | - |  |
-<br>
+
 
 pagination also support properties below
 
@@ -63,8 +63,7 @@ pagination also support properties below
 | ---- | ---- | ---- | ---- | ---- |
 | height | Pagination height | number | 50 |  |
 | wrapperStyle | Wrapper element style for pagination | object | - |  |
-<br>
-<br>
+
 
 ### rowSelection
 Properties for row selection.
@@ -78,8 +77,7 @@ Properties for row selection.
 | onSelect | Callback executed when select/deselect one row | Function(selectedRowKeys, selectedRows) | - |  |
 | onSelectAll | Callback executed when select/deselect all rows | Function(selected, selectedRows, changeRows) | - |  |
 
-<br>
-<br>
+
 
 ### Column
 One of the Table columns prop for describing the table's columns, Column has the same API.
@@ -87,7 +85,7 @@ One of the Table columns prop for describing the table's columns, Column has the
 | Property | Description | Type | Default | Version |
 | ---- | ---- | ---- | ---- | ---- |
 | ellipsis | Ellipsize cell content | boolean | false |  |
-| toolTip | A simple text popup tip, Used with `ellipsis`, [document](https://ant.design/components/tooltip/)  | boolean|object | false |  |
+| toolTip | A simple text popup tip, Used with `ellipsis`, [document](https://ant.design/components/tooltip/)  | boolean\|object | false |  |
 | width | Width of this column | number | - |  |
 | fixed |	Set column to be fixed: `true`(same as left) `'left'` `'right'` | boolean|string | - |  |
 | sort |	Column sort, see example below | object | - |  |
@@ -102,9 +100,6 @@ sort: {
   }
 }
 ```
-
-
-
 
 
 ## Related libraries
