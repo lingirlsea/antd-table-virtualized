@@ -1,4 +1,4 @@
-[![NPM registry](https://img.shields.io/npm/v/antd-table-virtualized.svg?style=for-the-badge&color=blue)](https://yarnpkg.com/en/package/antd-table-virtualized)[![NPM license](https://img.shields.io/badge/license-mit-red.svg?style=for-the-badge)](LICENSE.md)
+[![NPM registry](https://img.shields.io/npm/v/antd-table-virtualized.svg?style=for-the-badge&color=blue)](https://yarnpkg.com/en/package/antd-table-virtualized)[![NPM download](https://img.shields.io/npm/dm/antd-table-virtualized.svg?style=for-the-badge&color=green)](https://npmcharts.com/compare/antd-table-virtualized?minimal=true)[![NPM license](https://img.shields.io/badge/license-mit-red.svg?style=for-the-badge)](LICENSE)
 
 ## antd-table-virtualized
 > React table components compatible with some antd table API
