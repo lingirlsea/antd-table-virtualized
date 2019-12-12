@@ -43,7 +43,7 @@ Please refer to src/App.js for usage, feel free to contact me <lingirlsea@gmail.
 
 ### AntdTableVirtualized 
 |  Property   | Description  |  Type  |  Default  |  Version  |
-|  ----   | ----  |  ----  |  ----    |  ----  |
+| :---- | :---- | :---- | :---- | :---- |
 | bordered | Whether to show all table borders | boolean | false |  |
 | striped | Whether Table is striped | boolean | false |  |
 | clickHighlight | Weather highlight the row after you clicked, support for custom color values | boolean \| string | false |  |
@@ -62,7 +62,7 @@ Please refer to src/App.js for usage, feel free to contact me <lingirlsea@gmail.
 pagination also support properties below
 
 | Property | Description | Type | Default | Version |
-| ---- | ---- | ---- | ---- | ---- |
+| :---- | :---- | :---- | :---- | :---- |
 | height | Pagination height | number | 50 |  |
 | wrapperStyle | Wrapper element style for pagination | object | - |  |
 
@@ -71,7 +71,7 @@ pagination also support properties below
 Properties for row selection.
 
 | Property | Description | Type | Default | Version |
-| ---- | ---- | ---- | ---- | ---- |
+| :---- | :---- | :---- | :---- | :---- |
 | columnWidth | Set the width of the selection column | number | 48 |  |
 | getCheckboxProps |	Get Checkbox props | Function(record) | - |  |
 | selectedRowKeys | Controlled selected row keys | number[] | [] |  |
@@ -85,11 +85,11 @@ Properties for row selection.
 One of the Table columns prop for describing the table's columns, Column has the same API.
 
 | Property | Description | Type | Default | Version |
-| ---- | ---- | ---- | ---- | ---- |
+| :---- | :---- | :---- | :---- | :---- |
 | ellipsis | Ellipsize cell content | boolean | false |  |
 | toolTip | A simple text popup tip, Used with `ellipsis`, [document](https://ant.design/components/tooltip/)  | boolean\|object | false |  |
 | width | Width of this column | number | - |  |
-| fixed |	Set column to be fixed: `true`(same as left) `'left'` `'right'` | boolean|string | - |  |
+| fixed |	Set column to be fixed: `true`(same as left) `'left'` `'right'` | boolean\|string | - |  |
 | sort |	Column sort, see example below | object | - |  |
 | render | Renderer of the table cell. The return value should be a ReactNode | Function(text, record, index) {} | - |  |
 
