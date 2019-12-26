@@ -231,6 +231,8 @@ export default class AntdTableVirtualized extends React.Component {
     const classes = classNames(
       'Cell Cell-Head',
       {
+        'Align-Center': columnItem['align'] === 'center',
+        'Align-Right': columnItem['align'] === 'right',
         'Sortable': !!columnItem['sort'],
         'Sorting': !!this.state.columnsSortConf[columnItem['dataIndex']]
       }
@@ -310,6 +312,8 @@ export default class AntdTableVirtualized extends React.Component {
       'Cell Cell-Body',
       striped ? rowIndex % 2 ? 'Cell-Even' : 'Cell-Odd' : '',
       {
+        'Align-Center': columnItem['align'] === 'center',
+        'Align-Right': columnItem['align'] === 'right',
         'Click-Highlight': this.state.clickedRowIndex === rowIndex,
         'Ellipsis': columnItem.ellipsis && !columnItem.toolTip,
         'Selected': hasSelectedClassName,

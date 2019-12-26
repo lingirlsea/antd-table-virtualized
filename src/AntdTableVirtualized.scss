@@ -21,6 +21,16 @@ $prefix: Antd-Table-Virtualized;
     }
   }
 
+  .Cell-Head, .Cell-Body {
+    &.Align-Center {
+      justify-content: center;
+    }
+
+    &.Align-Right {
+      justify-content: flex-end;
+    }
+  }
+
   .Placeholder {
     z-index: 9;
     position: absolute;
@@ -117,6 +127,7 @@ $prefix: Antd-Table-Virtualized;
     display: flex;
     align-items: center;
     padding-left: 10px;
+    padding-right: 10px;
     border-bottom: 1px solid $color-border;
 
     &.Sorting {
@@ -161,7 +172,7 @@ $prefix: Antd-Table-Virtualized;
     display: flex;
     align-items: center;
     padding-left: 10px;
-    padding-right: 5px;
+    padding-right: 10px;
     border-bottom: 1px solid $color-border;
     transition: background-color .3s;
     word-break: break-all;

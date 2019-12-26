@@ -7,6 +7,7 @@ const columns = [
     width: 100,
     title: '序号',
     dataIndex: 'index',
+    align: 'left',
     sort: {
       defaultOrder: 'ascend',
       handle: (sortConf) => {
@@ -19,6 +20,7 @@ const columns = [
     width: 150,
     title: '姓名',
     dataIndex: 'name',
+    align: 'center',
     sort: {
       defaultOrder: 'descend',
       handle: (sortConf) => {
@@ -40,7 +42,8 @@ const columns = [
   {
     fixed: 'left',
     width: 100,
-    title: '身高',  
+    title: '身高',
+    align: 'right',
     dataIndex: 'height',
     // ellipsis: true,
     toolTip: true,

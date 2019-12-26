@@ -114,7 +114,7 @@ class App extends React.Component {
           // }
         />
 
-        <Table
+        {/* <Table
           bordered
           size="middle"
           columns={columns}
@@ -122,11 +122,11 @@ class App extends React.Component {
           rowSelection={rowSelection}
           scroll={{x: 1000, y: 300}}
           rowKey="index"
-        />
+        /> */}
       </div>
     )
   }
-  
+
 }
 
 export default App;
