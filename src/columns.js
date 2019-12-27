@@ -2,8 +2,7 @@ import React from 'react'
 
 const columns = [
   {
-    fixed: true,
-    // fixed: 'left',
+    fixed: 'left',
     width: 100,
     title: '序号',
     dataIndex: 'index',
@@ -40,13 +39,105 @@ const columns = [
     }
   },
   {
-    fixed: 'left',
-    width: 100,
-    title: '身高',
-    align: 'right',
-    dataIndex: 'height',
-    // ellipsis: true,
-    toolTip: true,
+    // fixed: 'left',
+    title: '地址',
+    align: 'center',
+    children: [
+      {
+        title: '省',
+        width: 100,
+        dataIndex: 'province',
+        align: 'center'
+      },
+      {
+        title: '具体1',
+        children: [
+          {
+            title: '街道1',
+            width: 100,
+            dataIndex: 'street',
+            align: 'right',
+          },
+          {
+            title: '小区1',
+            width: 100,
+            dataIndex: 'zone',
+            align: 'right',
+          }
+        ]
+      },
+    ],
+    render: function() {
+      return (
+        <div style={{
+          width: 'calc(100% + 20px)',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          margin: '0 -10px',
+        }}
+      >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 40,
+              borderBottom: '1px solid #e8e8e8',
+            }}
+          >地址</div>
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              // alignItems: 'center',
+              // justifyContent: 'center',
+            }}>
+            <div
+              style={{
+                width: 100,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRight: '1px solid #e8e8e8',
+              }}
+            >省</div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 40,
+                  borderBottom: '1px solid #e8e8e8',
+                }}
+              >
+                具体1
+              </div>
+              <div style={{ flex: 1, display: 'flex' }}>
+                <div
+                  style={{
+                    width: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRight: '1px solid #e8e8e8',
+                  }}
+                >街道1</div>
+                <div
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >小区1</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
   },
 ]
 

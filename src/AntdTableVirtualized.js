@@ -8,6 +8,7 @@ import style from './AntdTableVirtualized.scss'
 
 const classPrefix = style.classPrefix
 const noopReturnEmptyObject = () => ({})
+const defaultColumnWidth = 200
 
 export default class AntdTableVirtualized extends React.Component {
 
@@ -80,11 +81,13 @@ export default class AntdTableVirtualized extends React.Component {
 
   columnsConf = () => {
     const { rowSelection, columns } = this.props
-    const _columns = [...columns]
+    const { contentColumns, headColumns } = flatten([...columns])
 
     let ret = {
       left: 0,
       right: 0,
+      headLeft: 0,
+      headRight: 0,
 
       leftWidth: 0,
       rightWidth: 0,
@@ -93,6 +96,10 @@ export default class AntdTableVirtualized extends React.Component {
       leftColumns: [],
       middleColumns: [],
       rightColumns: [],
+
+      headLeftColumns: [],
+      headMiddleColumns: [],
+      headRightColumns: [],
     }
 
     if(rowSelection) {
@@ -114,10 +121,6 @@ export default class AntdTableVirtualized extends React.Component {
             throw Error('Do not set `checked` or `defaultChecked` in `getCheckboxProps`. Please use `selectedRowKeys` instead.')
           }
 
-          // if(keys.indexOf('defaultChecked') > -1 && keys.indexOf('checked') > -1) {
-          //   throw Error('`defaultChecked` and `checked` can not be set at the same time in getCheckboxProps which in rowSelection prop')
-          // }
-
           checkboxProps.checked = selectedRowKeys.some(i => i === index)
 
           return (
@@ -130,15 +133,42 @@ export default class AntdTableVirtualized extends React.Component {
       }
 
       if(checkColumn.fixed === 'left') {
-        _columns.unshift(checkColumn)
+        contentColumns.unshift(checkColumn)
+        headColumns.unshift(checkColumn)
 
       } else {
-        _columns.push(checkColumn)
+        contentColumns.push(checkColumn)
+        headColumns.push(checkColumn)
       }
 
     }
 
-    _columns.forEach(item => {
+    headColumns.forEach(item => {
+      if (!item.hasOwnProperty('width')) {
+        item.width = 0
+      }
+
+      if(item.fixed === true) {
+        item.fixed = 'left'
+      }
+
+      if (item.fixed === 'left') {
+        ret.headLeft += 1
+        // ret.leftWidth += item.width
+        ret.headLeftColumns.push(item)
+
+      } else if (item.fixed === 'right') {
+        ret.headRight += 1
+        // ret.rightWidth += item.width
+        ret.headRightColumns.push(item)
+
+      } else {
+        
+        ret.headMiddleColumns.push(item)
+      }
+    })
+
+    contentColumns.forEach(item => {
       if (!item.hasOwnProperty('width')) {
         item.width = 0
       }
@@ -167,6 +197,9 @@ export default class AntdTableVirtualized extends React.Component {
     })
 
     ret.middleColumns = [...ret.leftColumns, ...ret.middleColumns]
+    ret.headMiddleColumns = [...ret.headLeftColumns, ...ret.headMiddleColumns]
+
+    console.log(ret)
 
     return ret
   }
@@ -227,7 +260,7 @@ export default class AntdTableVirtualized extends React.Component {
   }
 
   renderTopCell = ({ place, columnIndex, style }) => {
-    const columnItem = this.columnsConf[`${place}Columns`][columnIndex]
+    const columnItem = this.columnsConf[`head${place}Columns`][columnIndex]
     const classes = classNames(
       'Cell Cell-Head',
       {
@@ -261,7 +294,7 @@ export default class AntdTableVirtualized extends React.Component {
       )
     }
 
-    if(place === 'middle' && columnItem.fixed === 'left') {
+    if(place === 'Middle' && columnItem.fixed === 'left') {
       content = ''
     }
 
@@ -279,6 +312,10 @@ export default class AntdTableVirtualized extends React.Component {
           onClick={ e => this.onCheckboxClick(-1, e) }
         />
       )
+    } else {
+      if(columnItem.render) {
+        content = columnItem.render(content)
+      }
     }
 
     return (
@@ -335,15 +372,15 @@ export default class AntdTableVirtualized extends React.Component {
       }
 
       let toolTip = typeof columnItem.toolTip === 'boolean' ? {} : columnItem.toolTip
-        if(columnItem.ellipsis && toolTip) {
-          content = (
-            <Tooltip title={text} {...toolTip}>
-              <div className="Ellipsis">
-                {content}
-              </div>
-            </Tooltip>
-          )
-        }
+      if(columnItem.ellipsis && toolTip) {
+        content = (
+          <Tooltip title={text} {...toolTip}>
+            <div className="Ellipsis">
+              {content}
+            </div>
+          </Tooltip>
+        )
+      }
     }
 
     return (
@@ -363,7 +400,7 @@ export default class AntdTableVirtualized extends React.Component {
   }
 
   renderLeftTopCell = ({ columnIndex, rowIndex, style }) => {
-    return this.renderTopCell({ place: 'left', columnIndex, style })
+    return this.renderTopCell({ place: 'Left', columnIndex, style })
   }
 
   renderLeftBottomCell = ({ columnIndex, rowIndex, style }) => {
@@ -371,7 +408,7 @@ export default class AntdTableVirtualized extends React.Component {
   }
 
   renderMiddleTopCell = ({ columnIndex, rowIndex, style }) => {
-    return this.renderTopCell({ place: 'middle', columnIndex, style })
+    return this.renderTopCell({ place: 'Middle', columnIndex, style })
   }
 
   renderMiddleBottomCell = ({ columnIndex, rowIndex, style }) => {
@@ -379,7 +416,7 @@ export default class AntdTableVirtualized extends React.Component {
   }
 
   renderRightTopCell = ({ columnIndex, rowIndex, style }) => {
-    return this.renderTopCell({ place: 'right', columnIndex, style })
+    return this.renderTopCell({ place: 'Right', columnIndex, style })
   }
 
   renderRightBottomCell = ({ columnIndex, rowIndex, style }) => {
@@ -418,7 +455,7 @@ export default class AntdTableVirtualized extends React.Component {
               if (diff >= 0) {
                 item.width = diff
               } else {
-                item.width = 200
+                item.width = defaultColumnWidth
               }
 
               break
@@ -459,8 +496,8 @@ export default class AntdTableVirtualized extends React.Component {
                     style={{ height: rowHeadHeight }}>
                     <Grid
                       className={classNames('Left-Top-Grid')}
-                      columnCount={this.columnsConf.left}
-                      columnWidth={index => this.columnsConf.leftColumns[index].width}
+                      columnCount={this.columnsConf.headLeft}
+                      columnWidth={index => this.columnsConf.headLeftColumns[index].width}
                       height={rowHeadHeight + this.scrollbarSize}
                       rowCount={1}
                       rowHeight={this.rowHeadHeight}
@@ -501,8 +538,8 @@ export default class AntdTableVirtualized extends React.Component {
                     <Grid
                       className={classNames('Middle-Top-Grid')}
                       style={{ paddingLeft: this.columnsConf.rightWidth }}
-                      columnCount={this.columnsConf.middleColumns.length}
-                      columnWidth={index => this.columnsConf.middleColumns[index].width}
+                      columnCount={this.columnsConf.headMiddleColumns.length}
+                      columnWidth={index => this.columnsConf.headMiddleColumns[index].width}
                       height={rowHeadHeight + this.scrollbarSize}
                       rowCount={1}
                       rowHeight={this.rowHeadHeight}
@@ -553,8 +590,8 @@ export default class AntdTableVirtualized extends React.Component {
                     >
                       <Grid
                         className={classNames('Right-Top-Grid')}
-                        columnCount={this.columnsConf.right}
-                        columnWidth={index => this.columnsConf.rightColumns[index].width}
+                        columnCount={this.columnsConf.headRight}
+                        columnWidth={index => this.columnsConf.headRightColumns[index].width}
                         height={rowHeadHeight + this.scrollbarSize}
                         rowCount={1}
                         rowHeight={this.rowHeadHeight}
@@ -857,3 +894,39 @@ function addStylesheetRules(decls) {
     }
   }
 }
+
+function flatten(root) {
+  let headColumns = [...root]
+
+  root.forEach((item, index) => {
+    let ret = []
+    if(item.children) {
+      headColumns[index]['width'] = 0
+      deep(item, ret)
+      root.splice(index, 1)
+
+      let i = index
+      ret.forEach(el => {
+        headColumns[index]['width'] += el.width || defaultColumnWidth
+        root.splice(i++, 0, el)
+      })
+    }
+  })
+
+  function deep(arr, ret) {
+    arr.children.forEach(child => {
+      if(child.children) {
+        deep(child, ret)
+      } else {
+        if(root.fixed) {
+          child.fixed = root.fixed
+        }
+
+        ret.push(child)
+      }
+    })
+  }
+
+  return { headColumns,  contentColumns: root }
+}
+

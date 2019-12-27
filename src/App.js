@@ -42,9 +42,11 @@ class App extends React.Component {
       // columnWidth: 100,
       // fixed: 'left',
       selectedRowKeys: this.state.selectedRowKeys,
-      getCheckboxProps: record => ({
-        disabled: record.index === 1,
-      }),
+      getCheckboxProps: record => {
+        return {
+          disabled: record.index === 1,
+        }
+      },
       onChange: (selectedRowKeys, selectedRows) => {
         // console.log(selectedRowKeys, selectedRows)
         this.setState({ selectedRowKeys })
@@ -80,6 +82,7 @@ class App extends React.Component {
           columns={columns}
           dataSource={this.state.dataSource}
           rowHeight={40}
+          rowHeadHeight={120}
           onRow={record => {
             return {
               onClick: event => {
