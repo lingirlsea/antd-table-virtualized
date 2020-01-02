@@ -896,21 +896,22 @@ function addStylesheetRules(decls) {
 }
 
 function flatten(root) {
-  let headColumns = [...root]
+  let headColumns = [...root], contentColumns = []
 
   root.forEach((item, index) => {
     let ret = []
     if(item.children) {
       headColumns[index]['width'] = 0
       deep(item, ret)
-      root.splice(index, 1)
 
-      let i = index
       ret.forEach(el => {
         headColumns[index]['width'] += el.width || defaultColumnWidth
-        root.splice(i++, 0, el)
       })
+    } else {
+      contentColumns.push(item)
     }
+
+    contentColumns.concat(ret)
   })
 
   function deep(arr, ret) {
@@ -927,6 +928,6 @@ function flatten(root) {
     })
   }
 
-  return { headColumns,  contentColumns: root }
+  return { headColumns,  contentColumns }
 }
 
