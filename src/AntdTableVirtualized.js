@@ -199,8 +199,6 @@ export default class AntdTableVirtualized extends React.Component {
     ret.middleColumns = [...ret.leftColumns, ...ret.middleColumns]
     ret.headMiddleColumns = [...ret.headLeftColumns, ...ret.headMiddleColumns]
 
-    console.log(ret)
-
     return ret
   }
 
@@ -905,25 +903,22 @@ function flatten(root) {
       deep(item, ret)
 
       ret.forEach(el => {
+        el.fixed = item.fixed
         headColumns[index]['width'] += el.width || defaultColumnWidth
       })
     } else {
       contentColumns.push(item)
     }
 
-    contentColumns.concat(ret)
+    contentColumns = contentColumns.concat(ret)
   })
 
-  function deep(arr, ret) {
-    arr.children.forEach(child => {
+  function deep(node, result) {
+    node.children.forEach(child => {
       if(child.children) {
-        deep(child, ret)
+        deep(child, result)
       } else {
-        if(root.fixed) {
-          child.fixed = root.fixed
-        }
-
-        ret.push(child)
+        result.push(child)
       }
     })
   }

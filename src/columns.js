@@ -15,9 +15,8 @@ const columns = [
     }
   },
   {
-    // fixed: 'left',
+    fixed: 'left',
     title: '地址',
-    align: 'center',
     children: [
       {
         title: '省',
@@ -116,7 +115,7 @@ const columns = [
     },
   },
   {
-    // fixed: 'left',
+    fixed: 'left',
     width: 150,
     title: '姓名',
     dataIndex: 'name',
@@ -247,7 +246,8 @@ Array.from({ length: 10 }).forEach((_, index) => {
   columns.push({
     title: `标题${index + 1}`,
     width: 100,
-    dataIndex: 'title-' + index
+    // dataIndex: 'title-' + index
+    dataIndex: 'title'
   })
 })
 
