@@ -1,7 +1,7 @@
 import React from 'react'
-import Axios from "axios"
-import AntdTableVirtulized from './AntdTableVirtualized'
-import { Table } from 'antd'
+import Axios from 'axios'
+import AntdTableVirtulized from './AntdTableVirtualized/AntdTableVirtualized'
+// import { Table } from 'antd'
 import columns from './columns'
 import './App.css'
 
@@ -82,7 +82,7 @@ class App extends React.Component {
           columns={columns}
           dataSource={this.state.dataSource}
           rowHeight={40}
-          rowHeadHeight={120}
+          rowHeadHeight={30}
           onRow={record => {
             return {
               onClick: event => {
@@ -104,17 +104,6 @@ class App extends React.Component {
           }}
           rowSelection={rowSelection}
           pagination={pagination}
-          // placeholder={
-          //   <div style={{
-          //     display: 'flex',
-          //     alignItems: 'center',
-          //     justifyContent: 'center',
-          //     height: '100%',
-          //     color: '#ccc',
-          //   }}>
-          //     暂无数据
-          //   </div>
-          // }
         />
 
         {/* <Table

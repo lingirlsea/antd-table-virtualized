@@ -31,6 +31,12 @@ $prefix: Antd-Table-Virtualized;
     }
   }
 
+  table {
+    td {
+      padding: 0;
+    }
+  }
+
   .Placeholder {
     z-index: 9;
     position: absolute;
