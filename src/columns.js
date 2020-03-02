@@ -15,11 +15,28 @@ const columns = [
     }
   },
   {
-    fixed: 'right',
-    width: 120,
+    fixed: 'left',
+    width: 90,
     title: '姓名',
     dataIndex: 'name',
     align: 'center',
+    sort: {
+      defaultOrder: 'descend',
+      handle: (sortConf) => {
+        console.log(sortConf)
+      }
+    },
+    ellipsis: true,
+    toolTip: {
+      placement: 'right'
+    },
+    render: (text, record, index) => {
+      return (
+        <div style={{ backgroundColor: index === 2 ? 'lightgreen' : '' }}>
+          {text}
+        </div>
+      )
+    }
   },
   {
     fixed: 'left',
@@ -49,30 +66,6 @@ const columns = [
         ]
       },
     ],
-  },
-  {
-    // fixed: 'left',
-    width: 130,
-    title: '姓名',
-    dataIndex: 'name',
-    align: 'center',
-    sort: {
-      defaultOrder: 'descend',
-      handle: (sortConf) => {
-        console.log(sortConf)
-      }
-    },
-    // ellipsis: true,
-    toolTip: {
-      placement: 'right'
-    },
-    render: (text, record, index) => {
-      return (
-        <div style={{ backgroundColor: index === 2 ? 'lightgreen' : '' }}>
-          {text}
-        </div>
-      )
-    }
   },
   // {
   //   // fixed: 'left',

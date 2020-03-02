@@ -258,7 +258,7 @@ export default class AntdTableVirtualized extends React.Component {
       return this.columnsConf[`${place}Columns`].filter(column => !column.children).length
     }
 
-    return this.columnsConf[place]
+    return this.columnsConf[`${place}Columns`].length
   }
 
   rowHeadHeight = () => {
