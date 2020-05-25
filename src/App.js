@@ -41,6 +41,7 @@ class App extends React.Component {
     const rowSelection = {
       // columnWidth: 100,
       // fixed: 'left',
+      type: 'radio',
       selectedRowKeys: this.state.selectedRowKeys,
       getCheckboxProps: record => {
         return {
@@ -77,6 +78,7 @@ class App extends React.Component {
           bordered
           // clickHighlight
           // clickHighlight="red"
+          rowKey="name"
           multipleSort
           className="MyClassName"
           columns={columns}

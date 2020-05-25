@@ -17,7 +17,8 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { VariableSizeGrid as Grid } from 'react-window'
 import scrollbarSize from 'dom-helpers/scrollbarSize'
 import classNames from 'classnames'
-import { Icon, Tooltip, Checkbox, Pagination } from 'antd'
+import { Tooltip, Radio, Checkbox, Pagination } from 'antd'
+import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons'
 import { flatten, getColumnsSortConf, addStylesheetRules, getDepth, getChildren } from './helpers'
 import style from './AntdTableVirtualized.scss'
 
@@ -31,6 +32,7 @@ export default class AntdTableVirtualized extends React.Component {
 
   static defaultProps = {
     className: '',
+    rowKey: 'key',
     rowHeight: 40,
     rowHeadHeight: 40,
     clickHighlight: false,
@@ -109,6 +111,7 @@ export default class AntdTableVirtualized extends React.Component {
         internalUseOnly: true,
         width: rowSelection.columnWidth || 48,
         fixed: rowSelection.fixed || 'left',
+
         render: (text, record, index) => {
           const { rowSelection: { selectedRowKeys, getCheckboxProps = noopReturnEmptyObject } } = this.props
 
@@ -124,6 +127,15 @@ export default class AntdTableVirtualized extends React.Component {
           }
 
           checkboxProps.checked = selectedRowKeys.some(i => i === index)
+
+          if(rowSelection.type === 'radio') {
+            return (
+              <Radio
+                {...checkboxProps}
+                onClick={e => this.onRadioClick(index, e)}
+              />
+            )
+          }
 
           return (
             <Checkbox
@@ -320,8 +332,8 @@ export default class AntdTableVirtualized extends React.Component {
                     {content}
                   </div>
                   <div className="Icons">
-                    <Icon className={cartUpClassName} style={{ marginBottom: -4 }} type="caret-up" />
-                    <Icon className={cartDownClassName} type="caret-down" />
+                    <CaretUpOutlined className={cartUpClassName} style={{ marginBottom: -4 }} />
+                    <CaretDownOutlined className={cartDownClassName} />
                   </div>
                 </div>
               )
@@ -330,11 +342,12 @@ export default class AntdTableVirtualized extends React.Component {
 
             // when rowSelection prop available
             if(node.internalUseOnly) {
-              const { dataSource, rowSelection: { selectedRowKeys } } = this.props
+              const { dataSource, rowSelection: { type, selectedRowKeys } } = this.props
               const checked = !!dataSource.length && selectedRowKeys.length === dataSource.length
               const indeterminate = checked ? false : selectedRowKeys.length ? true : false
-
+              
               content = (
+                type === 'radio' ? null :
                 <Checkbox
                   disabled={!dataSource.length}
                   checked={checked}
@@ -825,6 +838,17 @@ export default class AntdTableVirtualized extends React.Component {
   onPaginationChange = (page, pageSize) => {
     this.page = page
     this.props.pagination.onChange(page, pageSize)
+  }
+
+  onRadioClick = (rowIndex, event) => {
+    event.stopPropagation()
+
+    const checked = event.target.checked
+    const { dataSource } = this.props
+    const { onChange, onSelect } = this.props.rowSelection
+
+    onSelect && onSelect(dataSource[rowIndex], checked, [rowIndex], event.nativeEvent)
+    onChange && onChange([rowIndex], dataSource[rowIndex])
   }
 
   onCheckboxClick = (rowIndex, event) => {
