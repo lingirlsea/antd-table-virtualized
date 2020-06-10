@@ -41,7 +41,7 @@ class App extends React.Component {
     const rowSelection = {
       // columnWidth: 100,
       // fixed: 'left',
-      type: 'radio',
+      // type: 'radio',
       selectedRowKeys: this.state.selectedRowKeys,
       getCheckboxProps: record => {
         return {
@@ -49,7 +49,7 @@ class App extends React.Component {
         }
       },
       onChange: (selectedRowKeys, selectedRows) => {
-        // console.log(selectedRowKeys, selectedRows)
+        console.log(selectedRowKeys, selectedRows)
         this.setState({ selectedRowKeys })
       },
       onSelect: (record, selected, selectedRows, nativeEvent) => {
@@ -79,6 +79,7 @@ class App extends React.Component {
           // clickHighlight
           // clickHighlight="red"
           rowKey="name"
+          // rowKey={record => record.index + record.name}
           multipleSort
           className="MyClassName"
           columns={columns}

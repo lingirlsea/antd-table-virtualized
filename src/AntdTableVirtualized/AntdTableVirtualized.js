@@ -80,6 +80,12 @@ export default class AntdTableVirtualized extends React.Component {
   }
 
   componentDidUpdate() {
+    const { dataSource } = this.props
+    this.rowKeysDict = []
+    dataSource.forEach((record, index) => {
+      this.rowKeysDict.push(this.getRowKey(record, index))
+    })
+
     if(this.prevPage !== this.page) {
       this.prevPage = this.page
       this.rightBottomGridRef.current.scrollTo({ scrollTop: 0 })
@@ -113,7 +119,9 @@ export default class AntdTableVirtualized extends React.Component {
         fixed: rowSelection.fixed || 'left',
 
         render: (text, record, index) => {
-          const { rowSelection: { selectedRowKeys, getCheckboxProps = noopReturnEmptyObject } } = this.props
+          const {
+            rowSelection: { selectedRowKeys, getCheckboxProps = noopReturnEmptyObject }
+          } = this.props
 
           if(!selectedRowKeys) {
             throw Error(`selectedRowKeys should be Array in rowSelection prop`)
@@ -126,13 +134,14 @@ export default class AntdTableVirtualized extends React.Component {
             throw Error('Do not set `checked` or `defaultChecked` in `getCheckboxProps`. Please use `selectedRowKeys` instead.')
           }
 
-          checkboxProps.checked = selectedRowKeys.some(i => i === index)
+          let key = this.getRowKey(record, index)
+          checkboxProps.checked = selectedRowKeys.some(val => val === key)
 
           if(rowSelection.type === 'radio') {
             return (
               <Radio
                 {...checkboxProps}
-                onClick={e => this.onRadioClick(index, e)}
+                onClick={e => this.onRadioClick(key, record, e)}
               />
             )
           }
@@ -140,7 +149,7 @@ export default class AntdTableVirtualized extends React.Component {
           return (
             <Checkbox
               {...checkboxProps}
-              onClick={e => this.onCheckboxClick(index, e)}
+              onClick={e => this.onCheckboxClick(index, key, e)}
             />
           )
         }
@@ -352,7 +361,7 @@ export default class AntdTableVirtualized extends React.Component {
                   disabled={!dataSource.length}
                   checked={checked}
                   indeterminate={indeterminate}
-                  onClick={e => this.onCheckboxClick(-1, e)}
+                  onClick={e => this.onCheckboxClick(-1, null, e)}
                 />
               )
             }
@@ -840,31 +849,31 @@ export default class AntdTableVirtualized extends React.Component {
     this.props.pagination.onChange(page, pageSize)
   }
 
-  onRadioClick = (rowIndex, event) => {
+  onRadioClick = (key, record, event) => {
     event.stopPropagation()
 
     const checked = event.target.checked
-    const { dataSource } = this.props
     const { onChange, onSelect } = this.props.rowSelection
 
-    onSelect && onSelect(dataSource[rowIndex], checked, [rowIndex], event.nativeEvent)
-    onChange && onChange([rowIndex], dataSource[rowIndex])
+    onSelect && onSelect(record, checked, [key], event.nativeEvent)
+    onChange && onChange([key], record)
   }
 
-  onCheckboxClick = (rowIndex, event) => {
+  onCheckboxClick = (rowIndex, key, event) => {
     event.stopPropagation()
 
     const checked = event.target.checked
-    const { dataSource } = this.props
-    const { selectedRowKeys, onChange, onSelect, onSelectAll, getCheckboxProps = noopReturnEmptyObject } = this.props.rowSelection
+    const { dataSource, rowSelection } = this.props
+    const { onChange, onSelect, onSelectAll, getCheckboxProps = noopReturnEmptyObject } = rowSelection
 
-    let copySelectedRowKeys = [...selectedRowKeys]
-    let changeRows = []
+    let selectedRowKeys = [...rowSelection.selectedRowKeys]
+    let selectedRows, changeRows = []
     let isCheckedAll = true
 
     if(rowIndex === -1) {
       dataSource.forEach((item, index) => {
-        let exist = copySelectedRowKeys.some(i => i === index)
+        let _key = this.rowKeysDict[index]
+        let exist = selectedRowKeys.some(val => val === _key)
         let disabled = getCheckboxProps(item).disabled
 
         if(!disabled) {
@@ -875,12 +884,12 @@ export default class AntdTableVirtualized extends React.Component {
           if(checked) {
             if(!exist) {
               isCheckedAll = false
-              copySelectedRowKeys.push(index)
+              selectedRowKeys.push(_key)
             }
           } else {
             if(exist) {
-              let i = copySelectedRowKeys.indexOf(index)
-              copySelectedRowKeys.splice(i, 1)
+              let i = selectedRowKeys.indexOf(_key)
+              selectedRowKeys.splice(i, 1)
             }
           }
         }
@@ -889,36 +898,67 @@ export default class AntdTableVirtualized extends React.Component {
       if(isCheckedAll) {
         let tmp = []
         dataSource.forEach((item, index) => {
-          let exist = copySelectedRowKeys.some(i => i === index)
+          let key = this.rowKeysDict[index]
+          let exist = selectedRowKeys.some(val => val === key)
           let disabled = getCheckboxProps(item).disabled
 
           if(exist && disabled) {
-            tmp.push(index)
+            tmp.push(key)
           }
         })
 
-        copySelectedRowKeys = tmp
+        selectedRowKeys = tmp
       }
 
-      copySelectedRowKeys.sort((a, b) => a - b)
-      onSelectAll && onSelectAll(checked, copySelectedRowKeys.map(key => dataSource[key]), changeRows)
+      selectedRows = this.mapSelectedRowKeysToSelectedRows(selectedRowKeys)
+      onSelectAll && onSelectAll(checked, selectedRows, changeRows)
     } else {
 
       if(checked) {
-        if(copySelectedRowKeys.indexOf(rowIndex) === -1) {
-          copySelectedRowKeys.push(rowIndex)
-          copySelectedRowKeys.sort((a, b) => a - b)
+        if(selectedRowKeys.indexOf(key) === -1) {
+          selectedRowKeys.push(key)
         }
         
       } else {
-        let index = copySelectedRowKeys.indexOf(rowIndex)
-        copySelectedRowKeys.splice(index, 1)
+        let index = selectedRowKeys.indexOf(key)
+        selectedRowKeys.splice(index, 1)
       }
 
-      onSelect && onSelect(dataSource[rowIndex], checked, copySelectedRowKeys, event.nativeEvent)
+      onSelect && onSelect(dataSource[rowIndex], checked, selectedRowKeys, event.nativeEvent)
     }
 
-    onChange && onChange(copySelectedRowKeys, copySelectedRowKeys.map(key => dataSource[key]))
+    if(!selectedRows) {
+      selectedRows = this.mapSelectedRowKeysToSelectedRows(selectedRowKeys)
+    }
+    
+    onChange && onChange(selectedRowKeys, selectedRows)
+  }
+
+  mapSelectedRowKeysToSelectedRows = selectedRowKeys => {
+    const { dataSource } = this.props
+    let selectedRows = []
+
+    selectedRowKeys.forEach(rowkey => {
+      const index = this.rowKeysDict.findIndex(key => key === rowkey)
+      if(index > -1) {
+        selectedRows.push(dataSource[index])
+      }
+    })
+
+    return selectedRows
+  }
+
+  getRowKey = (record, key) => {
+    const { rowKey } = this.props
+
+    if(typeof rowKey === 'string' && record[rowKey]) {
+      key = record[rowKey]
+
+    } else if(typeof rowKey === 'function') {
+      key = rowKey(record)
+    }
+
+    return key
   }
 
   highlightAfterClick = rowIndex => {
